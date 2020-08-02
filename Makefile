@@ -22,7 +22,7 @@ npm:
 	sudo npm install express
 
 refresh:
-	sudo /etc/init.d/billing.service stop
+	sudo /etc/init.d/nodetodolist.service stop
 	sudo cp -avpf css/*.css $(BASE)/css/
 	sudo cp -avpf *.html $(BASE)/
 	sudo cp -avpf images/* $(BASE)/images/
@@ -49,13 +49,13 @@ install:
 	cp -avpf server.js $(DESTDIR)$(BASE)/
 	cp -avpf webfonts/* $(DESTDIR)$(BASE)/webfonts/
 	install -m 755 *.sh $(DESTDIR)$(BASE)/bin/
-	install -m 755 billing.service $(DESTDIR)/etc/init.d/
+	install -m 755 nodetodolist.service $(DESTDIR)/etc/init.d/
 	
 rpms:
 	#begin standard prep
 	mkdir -p $(PNAME)
 	
-	cp billing.service $(PNAME)/
+	cp nodetodolist.service $(PNAME)/
 	cp -avpf css $(PNAME)/
 	cp -avpf *.html $(PNAME)/
 	cp -avpf images $(PNAME)/
