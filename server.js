@@ -51,15 +51,15 @@ const BASE='.';
 const config_in_mem=JSON.parse(fs.readFileSync(BASE+'/data.json', 'utf8'));
 //const urlObject=URL.parse(config_in_mem.admin.endpoint);
 
-if(urlObject.port!=undefined)   adminport=urlObject.port;
-else {
-	if(urlObject.protocol=="https")   adminport=443;
-	else   adminport=80;
+// if(urlObject.port!=undefined)   adminport=urlObject.port;
+// else {
+// 	if(urlObject.protocol=="https")   adminport=443;
+// 	else   adminport=80;
 	
 	
-	console.log("protocol: "+urlObject.protocol);
-	adminport=443;
-}
+// 	console.log("protocol: "+urlObject.protocol);
+// 	adminport=443;
+// }
 
 function btoa(data) {
 	return Buffer.from(data).toString('base64');

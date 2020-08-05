@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>NodeJS Todolist</title>
 	<link rel="stylesheet" href="css/jquery-ui.css" />
-	<link rel="stylesheet" href="css/styles.css" />
+	<!--<link rel="stylesheet" href="css/styles.css" />-->
 	<link rel="stylesheet" href="css/nav.css" />
 	<link rel="stylesheet" href="css/modal.css" />
 	<link rel="stylesheet" href="css/fontawsme.css" />
@@ -14,30 +14,32 @@
 
 	<script src="js/jquery-1.12.4.js"></script>
 	<script src="js/jquery-ui.js"></script>
-	<script src="js/constants.js"></script>
+	<!-- script src="js/constants.js"></script> -->
 	<script src="js/utils.js"></script>
 
-	<script src="js/nav.js"></script>
+	<!-- <script src="js/nav.js"></script> -->
 	
 	<!--<script src="js/config.js"></script>-->
 	<script>
   
 	$(document).ready(function(){
   
-		initNav();
+		//initNav();
 		
 		
-		onReLoadConfigClick();
+		//onReLoadConfigClick();
 		console.log("document ready");
 		
 	});
-  
+	
 	</script>
 </head>
-<body>
-
-
-   
+<body onload="loadit('toptodolist.json');">
+	<strong>Vote!</strong>
+	Total Vote Count: <input type=text id="voteCount" /><BR>
+	<table id="thetable" border=1>
+	</table>
+	<button onclick="render()">Refresh Page</button>
+	<button onclick="saveit()">Save</button>
 </body>
-
 </html>
