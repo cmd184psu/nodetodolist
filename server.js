@@ -143,6 +143,39 @@ function sendFileContent(response, fileName, contentType){
 	});
 }
 
+app.post("/*", function(request, response) {
+
+	var url=request.url;
+	
+	var data=request.body;
+
+	console.log("writing to "+url);
+
+	console.log(JSON.stringify(data,null,3));
+
+
+ 	fs.writeFile('.'+url, JSON.stringify(data,null,3), function (err) {
+     	if( err ) {
+     		console.log( err );
+     	} else {
+     		JSON.stringify(data,null,2);
+     	}
+     });
+	response.end();
+
+})
+
+// console.log("writing file!");
+// 	var data=req.body;
+// 	fs.writeFile(flatdb, JSON.stringify(data), function (err) {
+//     	if( err ) {
+//     		console.log( err );
+//     	} else {
+//     		JSON.stringify(data,null,2);
+//     	}
+//     });
+// 	res.end();
+
 app.listen(port);
 
 console.log('(NodeJS Todolist) RESTful API server started on: ' + port);
