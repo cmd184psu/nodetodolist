@@ -8,14 +8,24 @@ function LoadFile(filename) {
     });
 }
 
+function clearVotes() {
+    for(var i=0; i<arrayOfContent.length; i++) {
+        arrayOfContent[i].votes=0;
+        if(arrayOfContent[i].winner!=undefined) arrayOfContent[i].winner=undefined;
+    }
+}
+function clearWinner() {
+    for(var i=0; i<arrayOfContent.length; i++) {
+        if(arrayOfContent[i].winner!=undefined) arrayOfContent[i].winner=undefined;
+    }
+}
+
 //FIXME: incomplete!
 function SaveFile(filename) {
     console.log("SaveFile("+filename+");");
 
     console.log(JSON.stringify(arrayOfContent,null,3));
-    for(var i=0; i<arrayOfContent.length; i++) {
-        arrayOfContent[i].vote=0;
-    }
+    clearVotes();
 
     $.ajax({
 		url: '/'+BASE+filename,
@@ -127,7 +137,7 @@ function renderRow(i) {
     var row="";
     var trophy="";
 
-    if(arrayOfContent[i].votes==maxVotes) {
+    if(arrayOfContent[i].winner) {
         trophy="<td><i class=\"fas fa-trophy\"></i></td>";
         arrayOfContent[i].currentWeight--;
         if(arrayOfContent[i].currentWeight==0) arrayOfContent[i].skip=true;
@@ -239,12 +249,23 @@ function vote() {
     total_vote_count=t;
     //console.log("extra votes: "+extra);
     
-    for(var j=0; j<arrayOfContent.length; j++) {
-        if(arrayOfContent[j].votes>maxVotes) maxVotes=arrayOfContent[j].votes
-    }
 
+    clearWinner();
+    maxVote_j=-1;
+    for(var j=0; j<arrayOfContent.length; j++) {
+        if(arrayOfContent[j].votes>=maxVotes) {
+           
+            maxVotes=arrayOfContent[j].votes
+            arrayOfContent[j].winner=true;
+            if(maxVote_j!=-1) arrayOfContent[maxVote_j].winner=false;
+            maxVote_j=j;
+            console.log("\twinner = "+j);
+        }
+    }
+    console.log("\tmaxVote_j="+maxVote_j);
     console.log(random_num);
     console.log(weighted_list[random_num]);
+    maxVotes=0;
     render();
 }
 function render() {
