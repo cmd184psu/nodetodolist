@@ -15,20 +15,10 @@
 	<script src="js/jquery-ui.js"></script>
 	<!-- script src="js/constants.js"></script> -->
 	<script src="js/utils.js"></script>
-	<!-- <script src="js/nav.js"></script> -->
-	<!--<script src="js/config.js"></script>-->
 	<script>
-  
-	$(document).ready(function(){
-  
-		//initNav();
-		
-		
-		//onReLoadConfigClick();
-		console.log("document ready");
-		
-	});
-	
+		$(document).ready(function(){
+			console.log("document ready");
+		});
 	</script>
 </head>
 <body onload="loadit('toptodolist.json');">
@@ -47,7 +37,7 @@
 			<td>Item: </td><td><input id="itemName" type="text" size="30" /></td>
 		</tr>
 		<tr>
-			<td>Weight: </td><td><input id="itemWeight" type="text" size="30" /></td>
+			<td>JSON: (optional) </td><td><input id="itemJSON" type="text" size="30" /></td>
 		</tr>
 		<tr>
 			<td></td><td><button onclick="addIt()">Add Item to List</button></td>

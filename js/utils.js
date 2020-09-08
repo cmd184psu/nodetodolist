@@ -1,5 +1,9 @@
 
 const BASE='jsonrepo/'
+const COOLDOWN_TIME=60000
+const VOTES_TO_CAST=100
+
+
 var currentFilename="";
 var maxVotes=0;
 function LoadFile(filename) {
@@ -8,10 +12,17 @@ function LoadFile(filename) {
     });
 }
 
-function clearVotes() {
+function dropVars() {
     for(var i=0; i<arrayOfContent.length; i++) {
-        arrayOfContent[i].votes=0;
-        if(arrayOfContent[i].winner!=undefined) arrayOfContent[i].winner=undefined;
+        arrayOfContent[i].votes=undefined;
+        arrayOfContent[i].winner=undefined;
+        arrayOfContent[i].resetWeight=undefined;
+        arrayOfContent[i].currentWeight=undefined;
+        arrayOfContent[i].value=undefined;
+        arrayOfContent[i].winner=undefined;
+        arrayOfContent[i].vote=undefined;
+        arrayOfContent[i].expires=undefined;
+        arrayOfContent[i].tempSkip=undefined;
     }
 }
 function clearWinner() {
@@ -24,8 +35,9 @@ function clearWinner() {
 function SaveFile(filename) {
     console.log("SaveFile("+filename+");");
 
+    dropVars();
     console.log(JSON.stringify(arrayOfContent,null,3));
-    clearVotes();
+    
 
     $.ajax({
 		url: '/'+BASE+filename,
@@ -52,14 +64,6 @@ function SaveFile(filename) {
 
 function calcValue(v,tv) {
     return v/tv;
-}
-
-function TotalValue(list) {
-    var totalValue=0;
-    for(var i=0; i<list.length; i++) {
-	    totalValue+=list[i].currentWeight;
-    }
-    return totalValue;
 }
 
 function TotalVotes(list) {
@@ -90,15 +94,13 @@ function addIt() {
     var object={};
 
     object.name=$("#itemName").val();
-    object.currentWeight=$("#itemWeight").val();
-    object.resetWeight=$("#itemWeight").val();
     object.votes=0;
     object.skip=false;
-
+    if($("#itemJSON").val()!="") arrayOfContent[i].json=$("#itemJSON").val();
     arrayOfContent.push(object);
 
     $("#itemName").val("");
-    $("#itemWeight").val(0);
+
     render();
 }
 
@@ -126,23 +128,29 @@ function moveDown(i) {
     }
 }
 
-function resetWeight(i) {
-    arrayOfContent[i].currentWeight=arrayOfContent[i].resetWeight;
+function resetCoolDown(i) {
+    arrayOfContent[i].expires=0;
     render();
 }
 
+function isInCoolDown(item) {
+    var d=new Date();
+    return (item.expires!=undefined && item.expires>d.getTime());
+}
 function renderRow(i) {
     //add delete column
     //var row="<td name=\"delcol\"><button onclick=\"deleteit("+i+")\">Delete</button></td>";
     var row="";
     var trophy="";
 
+    var d=new Date();
     if(arrayOfContent[i].winner) {
         trophy="<td><i class=\"fas fa-trophy\"></i></td>";
-        arrayOfContent[i].currentWeight--;
-        if(arrayOfContent[i].currentWeight==0) arrayOfContent[i].skip=true;
+        arrayOfContent[i].expires=d.getTime()+COOLDOWN_TIME;
+        
     }
 
+    
 
     var updown="<table><tr>";
     updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
@@ -151,8 +159,10 @@ function renderRow(i) {
     updown+="<td>"+trophy+"</td>";
     updown+="</tr></table>";
 
+
+   
     //add checkbox
-    if(arrayOfContent[i].skip) {
+    if(arrayOfContent[i].skip || (!arrayOfContent[i].winner && isInCoolDown(arrayOfContent[i]))) {
         row="<td><input type=\"checkbox\" checked onclick=\"dontskipit("+i+")\"/></td>";
         row+="<td>"+updown+"</td>";
         row+="<td>"+(i+1)+"</td>";
@@ -170,17 +180,20 @@ function renderRow(i) {
     
 
     //add vote count
-    row+="<td>"+arrayOfContent[i].votes+"</td>";
+    if(arrayOfContent[i].votes==undefined)
+        row+="<td>&nbsp;</td>";
+    else
+        row+="<td>"+arrayOfContent[i].votes+"</td>";
 
 
-    if(arrayOfContent[i].value!=undefined) {
-        arrayOfContent[i].resetWeight=arrayOfContent[i].value;
-        arrayOfContent[i].currentWeight=arrayOfContent[i].value;
-        arrayOfContent[i].value=undefined;
-    }
-
-    //add weight
-    row+="<td><table><tr><td width=60px>"+arrayOfContent[i].currentWeight+"/"+arrayOfContent[i].resetWeight+"&nbsp;</td><td><span onclick=\"resetWeight("+i+")\"><i class=\"fas fa-sync\"></i></span></td></tr></table></td>";
+    
+    //cool down
+    var timeRemaining=0;
+    var coolDown="Cool down";
+    if(arrayOfContent[i].expires==undefined || (arrayOfContent[i].expires-d.getTime()<=0)) { 
+        coolDown="Ready";
+    } 
+    row+="<td><table><tr><td width=60px>"+coolDown+"&nbsp;</td><td><span onclick=\"resetCoolDown("+i+")\"><i class=\"fas fa-sync\"></i></span></td></tr></table></td>";
 
     
 
@@ -188,124 +201,123 @@ function renderRow(i) {
     return "<tr>"+row+"</tr>";
 }
 
+function eligibleToVote(item) {
+    var d=new Date();
+    if(item.skip) return false;
+    if(item.expires!=undefined && item.expires-d.getTime()>0) return false;
+    return true;
+}
 function vote() {
     //clear the vote
     for (var i = 0; i < arrayOfContent.length; i++) {
         arrayOfContent[i].votes=0;
     }
 
-    //if($('#voteCount').val()!=0) total_vote_count=$('#voteCount').val();
-    //else 
-    total_vote_count=100;
-
     var rand = function(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
  
-    var generateWeightedList = function(list) {
-        var tv=TotalValue(list);
-        var weighted_list = [];
+    var generateVoteList = function(list) {
+        var vote_list = [];
         console.log("list length="+list.length);
-        // Loop over weights
+        
         for (var i = 0; i < list.length; i++) {
-            if(!list[i].skip) {
-                var multiples = calcValue(list[i].currentWeight,tv) * 100;
-                console.log("list["+i+"].name="+list[i].name+" cw="+list[i].currentWeight);
-                console.log("multiples="+multiples);
+            if(eligibleToVote(list[i]) ) {
+                console.log("list["+i+"].name="+list[i].name);
                 // Loop over the list of items
-                for (var j = 0; j < multiples; j++) {
-                    weighted_list.push(list[i].name);
-                }
+                vote_list.push(list[i].name);
+                
             }
         }
-        return weighted_list;
+        return vote_list;
     };
 
     //var list = ['javascript', 'php', 'ruby', 'python'];
-    //var weight = [0.5, 0.2, 0.2, 0.1];
-    var weighted_list = generateWeightedList(arrayOfContent);
+    
+    var vote_list = generateVoteList(arrayOfContent);
 
-    console.log(weighted_list.length);
+    console.log(vote_list.length);
     var random_num = 0;
     var extra=0;
-    var t=total_vote_count;
-    for(var i=0; i<total_vote_count && weighted_list.length>0; i++) {
-        random_num=rand(0, weighted_list.length-1);
-    	for(var j=0; j<arrayOfContent.length; j++) {
-            // console.log("vote for "+weighted_list[random_num]);
-            if(arrayOfContent[j].skip && arrayOfContent[j].name==weighted_list[random_num]) {
-                extra++;
-                weighted_list.splice(random_num,1);
-            } else if(arrayOfContent[j].name==weighted_list[random_num] && !arrayOfContent[j].skip && arrayOfContent[j].currenWeight!=0) {
-                arrayOfContent[j].votes++;
+    var t=VOTES_TO_CAST;
+    var old_random_num=-1;
+    var random_num=-1;
+
+
+    clearWinner();
+    maxVote_j=-1;
+
+
+    switch(vote_list.length) {
+        case 0:
+            console.log("no votes were cast");
+        break;
+        case 1:
+            for(var j=0; j<arrayOfContent.length; j++) {
+                if(arrayOfContent[j].name==vote_list[0]) {
+                    arrayOfContent[j].votes=VOTES_TO_CAST;
+                    arrayOfContent[j].winner=true;
+                }
             }
-        }
-        if(extra==t) total_vote_count=-1;
-        else {
-            total_vote_count+=extra;
-            extra=0;
-        }
+        break;
+        default: // size 2 or bigger
+            for(var i=0; i<VOTES_TO_CAST; i++) {
+                while(old_random_num==random_num) {
+                    random_num=rand(0, vote_list.length-1);
+                }
+                old_random_num=random_num;
+                for(var j=0; j<arrayOfContent.length; j++) {
+                    if(arrayOfContent[j].name==vote_list[random_num]) {
+                        arrayOfContent[j].votes++;
+                    } else {
+                        console.log("skipped: "+arrayOfContent[j].name)
+                    }
+                }
+            }
+        break;
+
     }
     total_vote_count=t;
     //console.log("extra votes: "+extra);
     
-
-    clearWinner();
+    maxVotes=0;
     maxVote_j=-1;
     for(var j=0; j<arrayOfContent.length; j++) {
-        if(arrayOfContent[j].votes>=maxVotes) {
-           
+        if(arrayOfContent[j].votes>maxVotes) {
             maxVotes=arrayOfContent[j].votes
-            arrayOfContent[j].winner=true;
-            if(maxVote_j!=-1) arrayOfContent[maxVote_j].winner=false;
             maxVote_j=j;
-            console.log("\twinner = "+j);
         }
     }
-    console.log("\tmaxVote_j="+maxVote_j);
-    console.log(random_num);
-    console.log(weighted_list[random_num]);
+
+    if(maxVote_j>-1) {
+        console.log("the winner is: "+arrayOfContent[maxVote_j].name+" with "+arrayOfContent[maxVote_j].votes)
+        arrayOfContent[maxVote_j].winner=true;
+    } else {
+        console.log("no winner declared")
+    }
+   
     maxVotes=0;
     render();
 }
 function render() {
-    var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Weight</th></tr>";
+    var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Ready?</th></tr>";
 
     console.log("length of array="+arrayOfContent.length);
 
     //console.log(JSON.stringify(arrayOfContent,null,3));
 
     for(var i=0; i<arrayOfContent.length; i++) {
-        // var delcol="<td name=\"delcol\"><button onclick=\"deleteit("+i+")\">Delete</button></td>";
-        // var checkbox_and_name=;
-	    // if(arrayOfContent[i].skip) {
-
-        //     var checkbox_and_name=";
-
-            
-
-           
-
-        //     content+="<tr>"+delcol+checkbox_and_name+"<td></td><td>"+arrayOfContent[i].votes+"</td><td>";
-		// 	continue;
-        // }
-        // if(arrayOfContent[i].json!=undefined) {
-        //     content+="<tr>"+delcol+checkbox_and_name+"<td><a href=\"javascript:SaveAndLoad('"+arrayOfContent[i].json+"')\">"+arrayOfContent[i].name+"</a></td><td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td><td>"+arrayOfContent[i].votes+"</td><td>";
-        // } else {
-    	//     content+="<tr>"+delcol+checkbox_and_name+"<td><input type=\"checkbox\" onclick=\"skipit("+i+")\"/></td><td>"+arrayOfContent[i].name+"</td><td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td><td>"+arrayOfContent[i].votes+"</td><td>";
-        // }
-        // if(arrayOfContent[i].votes==maxVotes) {
-        //     content+=" Winner!";
-        //     arrayOfContent[i].currentWeight--;
-        //     if(arrayOfContent[i].currentWeight==0) arrayOfContent[i].skip=true;
-        // }
-        // content+="</td><td>"+arrayOfContent[i].currentWeight+"</td></tr>";
         content+=renderRow(i);
     }
 
-    content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td>"+(TotalValue(arrayOfContent)+1)+"</td></tr>";
+    content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td>=====</td></tr>";
 
     document.getElementById("thetable").innerHTML=content;
+    var now=new Date();
+    var future=new Date(60000+now.getTime());
+    console.log("==== "+(future.getUTCMilliseconds()-now.getUTCMilliseconds()));
+    console.log("now: "+now.toISOString());
+    console.log("future: "+future.toISOString());
 }
 
 async function loadit(filename) {
