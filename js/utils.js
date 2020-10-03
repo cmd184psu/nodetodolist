@@ -89,6 +89,38 @@ function deleteit(i) {
     render();
 }
 
+function DaysToMS(days) {
+	//return days*24*60*60*1000;
+	return days*86400000;
+}
+
+function EpocMStoISODate(ms) {
+	var d=new Date(ms);
+	return formatedDate(d);
+}
+
+function isDueNow(ms) {
+    var now=new Date();
+    return ms<now.getTime();
+}
+
+function formatedDate(d) {
+    return (d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear();
+}
+
+function resetDueDate(i) {
+    var now=new Date();
+	var dtom=DaysToMS(arrayOfContent[i].period)
+	console.log("days="+arrayOfContent[i].period);
+	console.log("ms="+dtom);
+    console.log("ms(now)="+now.getTime());
+    console.log("formated date(now)="+formatedDate(now))
+	var dueDate=new Date(now.getTime()+dtom);
+	arrayOfContent[i].nextDue=dueDate.getTime();
+	console.log("next due is "+arrayOfContent[i].nextDue+" "+EpocMStoISODate(arrayOfContent[i].nextDue));
+    render();
+}
+
 function addIt() {
     console.log("add new item");
     var object={};
@@ -97,10 +129,26 @@ function addIt() {
     object.votes=0;
     object.skip=false;
     if($("#itemJSON").val()!="") arrayOfContent[i].json=$("#itemJSON").val();
+
+	if($("#itemPeriod").val()!="") {
+		object.periodic=true;
+		object.period=Number($("#itemPeriod").val());
+		var now=new Date();
+		var dtom=DaysToMS(object.period)
+		console.log("days="+object.period);
+		console.log("ms="+dtom);
+		console.log("ms(now)="+now.getTime());
+		var dueDate=new Date(now.getTime()+dtom);
+		object.nextDue=dueDate.getTime();
+		
+		console.log("next due is "+object.nextDue);
+		console.log("\tas date: "+EpocMStoISODate(object.nextDue));
+	}
     arrayOfContent.push(object);
 
     $("#itemName").val("");
-
+    $("#itemJSON").val("");
+    $("#itemPeriod").val("");
     render();
 }
 
@@ -171,10 +219,19 @@ function renderRow(i) {
         row="<td><input type=\"checkbox\" onclick=\"skipit("+i+")\"/></td>";
         row+="<td>"+updown+"</td>";
         row+="<td>"+(i+1)+"</td>";
+
+
+        var prepend="";
+        var append="";
+        if(arrayOfContent[i].periodic!=undefined && arrayOfContent[i].periodic && isDueNow(arrayOfContent[i].nextDue)) {
+            prepend="<strong><b>";
+            append="</b></strong>";
+        }
+        
         if(arrayOfContent[i].json!=undefined) {
-            row+="<td><a href=\"javascript:SaveAndLoad('"+arrayOfContent[i].json+"')\">"+arrayOfContent[i].name+"</a></td>";
+            row+="<td><a href=\"javascript:SaveAndLoad('"+arrayOfContent[i].json+"')\">"+prepend+arrayOfContent[i].name+append+"</a></td>";
         } else {
-            row+="<td>"+arrayOfContent[i].name+"</td>";
+            row+="<td>"+prepend+arrayOfContent[i].name+append+"</td>";
         }
     }
     
@@ -186,6 +243,21 @@ function renderRow(i) {
         row+="<td>"+arrayOfContent[i].votes+"</td>";
 
 
+	//new variables:
+	//periodic - boolean; if true, this item is a recurring item
+	//nextDue  - milliseconds since the EPOC / UTC, usually in the future; this is the next due date for this recurring item
+	//period   - duration between due dates in days		
+
+    // var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Ready?</th><th>Period (in days)</th><th>Next Due Date</th></tr>";
+    if(arrayOfContent[i].periodic==undefined || !arrayOfContent[i].periodic) {
+        row+="<td></td><td></td>";
+    } else {
+        var dueDate=new Date(arrayOfContent[i].nextDue);
+
+        row+="<td>"+arrayOfContent[i].period+"</td>";
+        row+="<td><table><tr><td width=90px>"+formatedDate(dueDate)+"&nbsp;</td><td><span onclick=\"resetDueDate("+i+")\"><i class=\"fas fa-sync\"></i></span></td></tr></table></td>";
+    }
+
     
     //cool down
     var timeRemaining=0;
@@ -196,8 +268,6 @@ function renderRow(i) {
     row+="<td><table><tr><td width=60px>"+coolDown+"&nbsp;</td><td><span onclick=\"resetCoolDown("+i+")\"><i class=\"fas fa-sync\"></i></span></td></tr></table></td>";
 
     
-
-
     return "<tr>"+row+"</tr>";
 }
 
@@ -300,30 +370,43 @@ function vote() {
     render();
 }
 function render() {
-    var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Ready?</th></tr>";
-
+    var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Period (in days)</th><th>Next Due Date</th><th>Cooldown</th></tr>";
     console.log("length of array="+arrayOfContent.length);
-
     //console.log(JSON.stringify(arrayOfContent,null,3));
-
     for(var i=0; i<arrayOfContent.length; i++) {
         content+=renderRow(i);
+		// for recurring expiration
+    	if(arrayOfContent[i].periodic!=undefined && arrayOfContent[i].periodic) {
+			console.log("==>"+i+"th can expire");    
+
+			//new variables:
+			//periodic - boolean; if true, this item is a recurring item
+			//nextDue  - milliseconds since the EPOC / UTC, usually in the future; this is the next due date for this recurring item
+			//period   - duration between due dates in days		
+
+            if(isDueNow(arrayOfContent[i].nextDue)) {
+                console.log("\tdue now and again in "+arrayOfContent[i].period+" days");
+            } else {
+				console.log("\tdue in the future: "+EpocMStoISODate(arrayOfContent[i].nextDue));
+			} 
+		} else {
+			console.log("==>"+i+"th does not expire");
+		}
     }
 
-    content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td>=====</td></tr>";
-
+    content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td colspan=3>=====</td></tr>";
     document.getElementById("thetable").innerHTML=content;
+    // for cooldown
     var now=new Date();
     var future=new Date(60000+now.getTime());
     console.log("==== "+(future.getUTCMilliseconds()-now.getUTCMilliseconds()));
-    console.log("now: "+now.toISOString());
-    console.log("future: "+future.toISOString());
+    console.log("now: "+formatedDate(now));
+    console.log("future: "+formatedDate(future));
 }
 
 async function loadit(filename) {
     currentFilename=filename;
     arrayOfContent=JSON.parse(await LoadFile(filename));
-
     render();
 }
 
