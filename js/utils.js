@@ -128,7 +128,7 @@ function addIt() {
     object.name=$("#itemName").val();
     object.votes=0;
     object.skip=false;
-    if($("#itemJSON").val()!="") arrayOfContent[i].json=$("#itemJSON").val();
+    if($("#itemJSON").val()!="") object.json=$("#itemJSON").val();
 
 	if($("#itemPeriod").val()!="") {
 		object.periodic=true;
