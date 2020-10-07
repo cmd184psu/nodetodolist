@@ -18,6 +18,7 @@
 	<script>
 		$(document).ready(function(){
 			console.log("document ready");
+			initAutoSave();
 		});
 	</script>
 </head>
@@ -28,7 +29,7 @@
 	</table>
 	<button onclick="vote()">Vote</button>
 	<button onclick="render()">Refresh Page</button>
-	<button onclick="saveit()">Save</button>
+	<button id="saveButton" onclick="saveit()">Save</button>
 	<BR />
 	<HR>
 	<BR />
