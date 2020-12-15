@@ -13,7 +13,7 @@
 //  limitations under the License.
 
 
-const express = require('express'), app = express(), port = process.env.PORT || 9090;
+const express = require('express'), app = express(), port = process.env.PORT || 8000;
 const bodyParser = require('body-parser');
 let path = require('path');  
 const fs = require("fs");
@@ -67,11 +67,25 @@ function btoa(data) {
 
 
 //var flatdb=__dirname+"/data.json";
+
+if(process.env.BASE!="" && process.env.BASE!=undefined) {
+	BASE=process.env.BASE;
+}
+
 var flatdb=BASE+"/data.json";
 
 console.log("sending: "+flatdb);
 app.get('/config', function(req, res) {
 	var content=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
+	
+	if(process.env.TOPJSON!="" && process.env.TOPJSON!=undefined) {
+		content.topjson=process.env.TOPJSON
+	}
+
+	if(process.env.JSONREPO!="" && process.env.JSONREPO!=undefined) {
+		content.jsonrepo=process.env.JSONREPO
+	}
+
 	if(req.query.pretty!=undefined) {
 		res.setHeader('Content-Type', 'plain/text');
 		res.setHeader('Content-Disposition','inline');
