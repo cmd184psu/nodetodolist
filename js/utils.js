@@ -1,7 +1,7 @@
 
 const BASE='jsonrepo/'
 const COOLDOWN_TIME=600000
-const AUTO_SAVE_ENABLED=true
+const AUTO_SAVE_ENABLED=false
 const AUTO_SAVE_PERIOD=60000
 const VOTES_TO_CAST=100
 
@@ -10,6 +10,9 @@ var currentFilename="";
 var maxVotes=0;
 function LoadFile(filename) {
 	return new Promise((resolve, reject) => {
+
+        $("#loaded").html(filename);
+
         $.get("/"+BASE+filename,"", function(result) { resolve(result); });
     });
 }
@@ -415,19 +418,19 @@ async function loadit(filename) {
     render();
     
 }
-function initAutoSave() {
-    if(AUTO_SAVE_ENABLED) {
-        console.log("doing auto-save...")
-        setTimeout(function() { 
-            console.log("=============================================")
-            console.log("calling saveit()...")
-            saveit();
-            console.log("reinstalling initAutoSave() recursively...")
+// function NOPEinitAutoSave() {
+//     if(AUTO_SAVE_ENABLED) {
+//         console.log("doing auto-save...")
+//         setTimeout(function() { 
+//             console.log("=============================================")
+//             console.log("calling saveit()...")
+//             saveit();
+//             console.log("reinstalling initAutoSave() recursively...")
 
-            initAutoSave(); 
-         }, AUTO_SAVE_PERIOD); //done
-    }
-}
+//             initAutoSave(); 
+//          }, AUTO_SAVE_PERIOD); //done
+//     }
+// }
 
 function saveit() {
     SaveFile(currentFilename);

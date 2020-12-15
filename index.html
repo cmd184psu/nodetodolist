@@ -18,12 +18,13 @@
 	<script>
 		$(document).ready(function(){
 			console.log("document ready");
-			initAutoSave();
+			//initAutoSave();
 		});
 	</script>
 </head>
 <body onload="loadit('toptodolist.json');">
 	<strong>Vote!</strong>
+	<div id="loaded">toptodolist.json</div>
 	<!-- Total Vote Count: <input type=text id="voteCount" value="100" /><BR>-->
 	<table id="thetable" border=1>
 	</table>
