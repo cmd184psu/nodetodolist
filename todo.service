@@ -1,0 +1,15 @@
+[Unit]
+Description=nodetodolist.js - todolist
+Documentation=https://example.com
+After=network.target
+
+[Service]
+Environment=PORT=8000
+Type=simple
+User=cdelezenski
+ExecStart=/usr/bin/node /opt/node/nodetodolist/server.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
