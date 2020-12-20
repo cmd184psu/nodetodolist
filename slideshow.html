@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>NodeJS Powered Slideshow</title>
+	<link rel="stylesheet" href="css/jquery-ui.css" />
+	<!--<link rel="stylesheet" href="css/styles.css" />-->
+	<link rel="stylesheet" href="css/nav.css" />
+	<link rel="stylesheet" href="css/modal.css" />
+	<link rel="stylesheet" href="css/fontawsme.css" />
+	<link rel='stylesheet' href='css/fontawall.css' />
+	<link rel='stylesheet' href='css/slideshow.css' />
+	<link rel="shortcut icon" href="images/fvw.png" type="image/x-icon" />
+	<script src="js/jquery-1.12.4.js"></script>
+	<script src="js/jquery-ui.js"></script>
+	<!-- script src="js/constants.js"></script> -->
+	<script src="js/utils.js"></script>
+	<script src="js/slideshow.js"></script>
+
+	<script>
+		$(document).ready(function(){
+			console.log("document ready");
+				//initAutoSave();
+				loadSlides('/jpg.json')
+				
+		});
+	</script>
+</head>
+<body>
+		
+		
+<table>
+	<tr>
+  		<td>Start here: <input type=text id="starthere" value=1 /></td>
+  		<td>Delay in seconds: </td>
+  		<td><div class="slidecontainer"><input type="range" min="2" max="10" value="5" id="delay"></div></td>
+  		<td>Max Width: <div id="mw">2000</div></td>
+  		<td><div class="slidecontainer"><input type="range" min="0" max="5" value="5" id="maxWidth" onchange="fixRes()"></div>px</td>
+  		<td>Max Height: <div id="mh">800</div></td>
+  		<td><div class="slidecontainer"><input type="range" min="0" max="5" value="5" id="maxHeight" onchange="fixRes()"></div>px</td>
+  	</tr>
+</table>
+  			
+		
+		<div class="slideshow-container">
+		
+		</div>
+		<br>
+		
+		<div style="text-align:center">
+		  <span class="dot"></span> 
+		  <span class="dot"></span> 
+		  <span class="dot"></span> 
+		  <span class="dot"></span> 
+		  <span class="dot"></span> 
+		</div>
+		<BR>
+		<table style="text-align:center" >
+		<tr>
+		<td>
+			<button id="backBtn" onClick="goBackwards()"><i class="fas fa-backward"></i></button>
+		</td>
+		<td>
+			<button id="pauseBtn" onClick="pauseShow()" style="display:none"><i class="fas fa-pause"></i></button>
+		</td>
+		<td>
+			<button id="playBtn" onClick="playShow()"><i class="fas fa-play"></i></button>
+		</td>
+		<td>
+			<button id="forwardBtn" onClick="goForwards()"><i class="fas fa-forward"></i></button>
+		</td>
+		<td>
+			<button id="nextSubjectBtn" onClick="nextSubject()"><i class="fas fa-fast-forward"></i></button>
+		</td>
+		</tr>
+		</table>
+		
+</body>
+
+
+</script>
+</html>
