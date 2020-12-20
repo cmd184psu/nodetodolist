@@ -124,7 +124,7 @@ app.get("/*", function(request, response) {
 	
 	var contentType="text/html";	
 	if(request.url.toString()=="/") {
-		if process.env.SLIDESHOWMODE != undefined) {
+		if (process.env.SLIDESHOWMODE != undefined) {
 
 			url="/slideshow.html";
 		} else {

@@ -2,7 +2,7 @@
 
 # usage: ./filestojson.sh > jpg.json
 
-find . -iname "*.jpg" | grep -iv recycle | sort > filelisting.txt
+find . -iname "*.jpg" -follow | grep -iv recycle | sort > filelisting.txt
 
 LEN=`cat filelisting.txt | wc -l`
 
