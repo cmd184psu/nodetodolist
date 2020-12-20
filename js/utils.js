@@ -7,6 +7,8 @@ const VOTES_TO_CAST=100
 
 
 var currentFilename="";
+var priorFilename="";
+var data=new Object;
 var maxVotes=0;
 function LoadFile(filename) {
 	return new Promise((resolve, reject) => {
@@ -14,6 +16,11 @@ function LoadFile(filename) {
         $("#loaded").html(filename);
 
         $.get(BASE+filename,"", function(result) { resolve(result); });
+    });
+}
+function ajaxGet(uri) {
+	return new Promise((resolve, reject) => {
+        $.get(uri,"", function(result) { resolve(result); });
     });
 }
 
@@ -413,11 +420,20 @@ function render() {
 }
 
 async function loadit(filename) {
+    if(filename==undefined) {
+        data=await ajaxGet("config/");
+        filename=data.topjson;
+    }
+
+    priorFilename=currentFilename;
     currentFilename=filename;
     arrayOfContent=JSON.parse(await LoadFile(filename));
     render();
     
 }
+
+
+
 // function NOPEinitAutoSave() {
 //     if(AUTO_SAVE_ENABLED) {
 //         console.log("doing auto-save...")
