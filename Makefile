@@ -5,7 +5,7 @@ PNAME=$(NAME)-$(VER)
 RPMTOP=~/rpmbuild
 SPEC=nodetodolist
 BASE=/opt/NodeJS-Todolist
-
+SERVICENAME=todo
 
 prep:
 	mkdir -p $(RPMTOP)/SOURCES
@@ -73,4 +73,10 @@ rpms:
 	rpmbuild -ba ./$(SPEC).spec --target noarch
 	mv -vf $(RPMTOP)/RPMS/noarch/$(NAME)-* .
 	mv -vf $(RPMTOP)/SRPMS/$(NAME)-* .
+
+install-service:
+	sudo install -m 755 $(SERVICENAME).service /lib/systemd/system/
+	sudo systemctl daemon-reload
+	sudo systemctl enable $(SERVICENAME)
+	sudo systemctl start $(SERVICENAME)
 
