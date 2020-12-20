@@ -1,5 +1,5 @@
 
-const BASE='jsonrepo/'
+const BASE='lists/'
 const COOLDOWN_TIME=600000
 const AUTO_SAVE_ENABLED=false
 const AUTO_SAVE_PERIOD=60000
@@ -13,7 +13,7 @@ function LoadFile(filename) {
 
         $("#loaded").html(filename);
 
-        $.get("/"+BASE+filename,"", function(result) { resolve(result); });
+        $.get(BASE+filename,"", function(result) { resolve(result); });
     });
 }
 
