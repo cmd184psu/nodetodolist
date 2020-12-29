@@ -15,8 +15,8 @@ clean:
 	rm -rf $(PNAME) $(PNAME)*rpm 
 
 
-diff: clean
-	git diff > diffs.txt
+diff: 
+	git diff -b > diffs.txt
 
 npm:
 	sudo npm install express
@@ -79,4 +79,16 @@ install-service:
 	sudo systemctl daemon-reload
 	sudo systemctl enable $(SERVICENAME)
 	sudo systemctl start $(SERVICENAME)
+
+build:
+
+	docker build -t cdelezenski/myapp .
+
+run-slideshow:
+	
+	docker run -p 8888:8888 -t -i -v /Volumes/nt:/usr/src/app/nt -d cdelezenski/myapp 
+
+run-todo:
+	
+	docker run -p 8000:8000 -t -i  -d cdelezenski/myapp 
 

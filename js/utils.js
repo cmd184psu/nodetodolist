@@ -10,6 +10,8 @@ var currentFilename="";
 var priorFilename="";
 var data=new Object;
 var maxVotes=0;
+var arrayOfContent=[];
+
 function LoadFile(filename) {
 	return new Promise((resolve, reject) => {
 
@@ -53,7 +55,7 @@ function SaveFile(filename) {
     
 
     $.ajax({
-		url: '/'+BASE+filename,
+		url: BASE+filename,
 		type: 'post',
 		dataType: 'text',
 		contentType: 'application/json',
@@ -428,7 +430,7 @@ async function loadit(filename) {
     priorFilename=currentFilename;
     currentFilename=filename;
     arrayOfContent=JSON.parse(await LoadFile(filename));
-    render();
+    if(data.prefix==undefined) render();
     
 }
 

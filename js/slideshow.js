@@ -75,7 +75,7 @@ async function loadSlides() {
 //         "<img src=\""+jpgs[i]+"\" style=\"height: 700px\">" +
 //         "</div>";
         var content_to_add_to_dom="<div class=\"mySlides fade\" ><div class=\"numbertext\">"+(i+1)+" / "+(jpgs.length+1)+" "+jpgs[i]+"</div>" +
-        "<img src=\""+jpgs[i]+"\" class=\"dimcontrol\">" +
+        "<img src=\""+data.prefix+"/"+jpgs[i]+"\" class=\"dimcontrol\">" +
         "</div>";
         console.log("adding to dom: "+content_to_add_to_dom);      
         $( ".slideshow-container" ).append( content_to_add_to_dom );

@@ -1,0 +1,36 @@
+to install modules:
+npm -i
+
+to run:
+
+npm run dev
+
+or 
+
+npm run ui
+
+or
+
+npm start
+
+
+
+configure .env for environment:
+
+PORT  - port to run on (default is 8000)
+
+BASE - where to read config from
+
+TOPJSON - initial list to show
+
+INDEX - todo.html or slideshow.html ... what to serve for / ; default is index.html
+
+PREFIX - nt
+
+Docker:
+
+docker run -p 8888:8888 -t -i -v /Volumes/nt:/usr/src/app/nt -d cdelezenski/myapp 
+
+docker exec -it 7cbc3294b229 /bin/bash
+
+docker build -t cdelezenski/myapp .

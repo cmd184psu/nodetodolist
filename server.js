@@ -12,6 +12,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+require("dotenv").config();
+
 
 const express = require('express'), app = express(), port = process.env.PORT || 8000;
 const bodyParser = require('body-parser');
@@ -19,6 +21,7 @@ let path = require('path');
 const fs = require("fs");
 const https = require('https');
 const URL = require('url');
+
 
 app.use(express.static(path.join(__dirname, 'data')));
 app.use(express.static('public'));
@@ -47,7 +50,13 @@ app.use((req, res, next) => {
     next();
 });
 
-const BASE='.';
+var BASE='.';
+
+if(process.env.BASE!="" && process.env.BASE!=undefined) {
+	BASE=process.env.BASE;
+}
+
+
 const config_in_mem=JSON.parse(fs.readFileSync(BASE+'/data.json', 'utf8'));
 //const urlObject=URL.parse(config_in_mem.admin.endpoint);
 
@@ -68,9 +77,7 @@ function btoa(data) {
 
 //var flatdb=__dirname+"/data.json";
 
-if(process.env.BASE!="" && process.env.BASE!=undefined) {
-	BASE=process.env.BASE;
-}
+
 
 var flatdb=BASE+"/data.json";
 
@@ -84,6 +91,12 @@ app.get('/config', function(req, res) {
 
 	if(process.env.JSONREPO!="" && process.env.JSONREPO!=undefined) {
 		content.jsonrepo=process.env.JSONREPO
+	}
+	if(process.env.INDEX!="" && process.env.INDEX!=undefined) {
+		content.index=process.env.INDEX
+	}
+	if(process.env.PREFIX!="" && process.env.PREFIX!=undefined) {
+		content.prefix=process.env.PREFIX
 	}
 
 	if(req.query.pretty!=undefined) {
@@ -120,17 +133,24 @@ app.get("/*", function(request, response) {
 
 	var url=request.url;
 	
+	var index_html="/index.html";
+
+	if(process.env.INDEX!="" && process.env.INDEX!=undefined) {
+		index_html=process.env.INDEX;
+	}
+
 	var contentType="text/html";	
 	if(request.url.toString()=="/") {
-		url="/index.html";
-		
+		url=index_html;
 	} else if(request.url.toString().endsWith(".js")){
 		contentType="text/javascript";
 	 } else if(request.url.toString().endsWith(".html")){
 		contentType="text/html";
 	 } else if(request.url.toString().endsWith(".png")){
 		contentType="image/png";
-	 } else if(request.url.toString().endsWith(".woff")){
+	} else if(request.url.toString().endsWith(".jpg")){
+		contentType="image/jpg";
+	} else if(request.url.toString().endsWith(".woff")){
 		contentType="font/woff";
 	 } else if(request.url.toString().endsWith(".woff2")){
 		contentType="font/woff2";
