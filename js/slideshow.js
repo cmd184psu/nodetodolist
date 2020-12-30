@@ -1,4 +1,5 @@
-var slideIndex = 1;
+var slideIndex = 0;
+var subjectIndex = 0;
 var paused=true
 var jpgs=[]
 //showSlides();
@@ -9,13 +10,13 @@ function showSlides() {
 } 
  
 function refreshDots() {
-  var dots = document.getElementsByClassName("dot");
+	var dots = document.getElementsByClassName("dot");
 	for (var i = 0; i < dots.length; i++) {
-    	dots[i].className = dots[i].className.replace(" active", "");
-  	}
-	dots[(slideIndex-1) % dots.length].className += " active";
+		dots[i].className = dots[i].className.replace(" active", "");
+	}
+	dots[(slideIndex) % dots.length].className += " active";
 }  
-// function recurring_showSlides() {
+  // function recurring_showSlides() {
 //   var i;
 //   var slides = document.getElementsByClassName("mySlides");
 //   
@@ -61,47 +62,144 @@ function playShow() {
 	document.getElementById("playBtn").style.display="none";
 	document.getElementById("pauseBtn").style.display="block";
 	//show current slide
-	slideIndex--;
+	//slideIndex--;
 	paused=false;
 	recurring_goForwards();
 }
 
-async function loadSlides() {
-    jpgs=JSON.parse(await LoadFile("/jpg.json"));
+// async function loadSlides_previous() {
+//     jpgs=JSON.parse(await LoadFile("/jpg.json"));
     
-    for(var i=0; i<jpgs.length; i++) {   
-        console.log("item "+jpgs[i])
-//         var content_to_add_to_dom="<div class=\"mySlides fade\"><div class=\"numbertext\">"+(i+1)+" / "+(jpgs.length+1)+" "+jpgs[i]+"</div>" +
-//         "<img src=\""+jpgs[i]+"\" style=\"height: 700px\">" +
+//     for(var i=0; i<jpgs.length; i++) {   
+//         console.log("item "+jpgs[i])
+// //         var content_to_add_to_dom="<div class=\"mySlides fade\"><div class=\"numbertext\">"+(i+1)+" / "+(jpgs.length+1)+" "+jpgs[i]+"</div>" +
+// //         "<img src=\""+jpgs[i]+"\" style=\"height: 700px\">" +
+// //         "</div>";
+//         var content_to_add_to_dom="<div class=\"mySlides fade\" ><div class=\"numbertext\">"+(i+1)+" / "+(jpgs.length+1)+" "+jpgs[i]+"</div>" +
+//         "<img src=\""+data.prefix+"/"+jpgs[i]+"\" class=\"dimcontrol\">" +
 //         "</div>";
-        var content_to_add_to_dom="<div class=\"mySlides fade\" ><div class=\"numbertext\">"+(i+1)+" / "+(jpgs.length+1)+" "+jpgs[i]+"</div>" +
-        "<img src=\""+data.prefix+"/"+jpgs[i]+"\" class=\"dimcontrol\">" +
-        "</div>";
-        console.log("adding to dom: "+content_to_add_to_dom);      
-        $( ".slideshow-container" ).append( content_to_add_to_dom );
+//         //console.log("adding to dom: "+content_to_add_to_dom);      
+//         $( ".slideshow-container" ).append( content_to_add_to_dom );
+//     }
+// }
+// async function loadSlides_new() {
+//     var subjects=JSON.parse(await LoadFile("/subjects"));
+	
+// 	for(var i=0; i<subjects.length; i++) {
+// 		console.log("working on subject: "+subjects[i])
+// 		$.get( "subjects/"+subjects[i], function( data ) {
+// 			subjects[i].entities=data;
+// 			var content_to_add_to_dom="";
+// 			for(var j=0; j<data.length; j++) {
+// 				console.log("looking at file: "+data[j])
+// 				content_to_add_to_dom+="<div class=\"mySlides fade\" ><div class=\"numbertext\">"+(j+1)+" / "+(data.length+1)+" "+data[j]+"</div>" +
+// 				"<img src=\""+data.prefix+"/"+data[j]+"\" class=\"dimcontrol\">" +
+// 				"</div>";
+// 			}
+// 			$( ".slideshow-container" ).append( content_to_add_to_dom );
+// 		});
+		
+//     }
+// }
+async function loadSlides() {
+    jpgs=await ajaxGet("/items");
+
+	console.log("found "+jpgs.length+" subjects.")
+
+	var slidecount=0;
+	slideIndex=0;
+	subjectIndex=0;
+
+	var select = document.getElementById('subject-selector');
+	for(var i=0; i<jpgs.length; i++) {   
+
+		var opt = document.createElement('option');
+    	opt.value = i;
+    	opt.innerHTML = jpgs[i].subject;
+    	select.appendChild(opt);
+
+		console.log("item (subject):"+jpgs[i].subject)
+		for(var j=0; j<jpgs[i].entries.length; j++) {
+			
+			var content_to_add_to_dom="<div class=\"mySlides fade\" id=\"subject"+i+"_slide"+j+"\" >"+
+				"<div class=\"numbertext\">"+(j+1)+" / "+(jpgs[i].entries.length+1)+" "+jpgs[i].entries[j]+"</div>" +
+         		"<img src=\""+data.prefix+"/"+jpgs[i].entries[j]+"\" class=\"dimcontrol\" onclick=\"goForwards(true)\" ondblclick=\"nextSubject()\">" +
+         		"</div>";
+         	//console.log("adding to dom: "+content_to_add_to_dom);      
+			$( ".slideshow-container" ).append( content_to_add_to_dom );
+			slidecount++;
+		}
     }
 }
+
 
 function goBackwards(pausestate) {
 	if(pausestate!=undefined) paused=pausestate;
 	
-	showImage(slideIndex,slideIndex-1);
+
+	showImage(slideIndex-1);
 }
 
 function goForwards(pausestate) {
 	if(pausestate!=undefined) paused=pausestate;
 	
-	showImage(slideIndex,slideIndex+1);
+	showImage(slideIndex+1);
 }
 
-function showImage(currentSlide,nextSlide) {
+function showImage(newslideIndex) {
+	//hide current element
+	var element_to_hide="subject"+subjectIndex+"_slide"+slideIndex;
+	console.log("setting element to hide ( "+element_to_hide+") to none");
+	console.log("\tsetting element to hide ( subject"+subjectIndex+"_slide"+slideIndex+") to none");
+
+
+	slideIndex=newslideIndex;
+	console.log("--->(1) slideIndex is now "+slideIndex)
+
+	if(slideIndex>jpgs[subjectIndex].entries.length-1) {
+		subjectIndex++;
+
+		if(subjectIndex>jpgs.length-1) subjectIndex=0;
+		slideIndex=0;
+	}
+
+	console.log("--->(2) slideIndex is now "+slideIndex)
+
+	if(slideIndex<0) {
+		console.log("\t--->CAUGHT: index < 0");
+		subjectIndex--;
+
+		if(subjectIndex<0) {
+			subjectIndex=jpgs.length-1;
+		}	
+		console.log("\t--->revert subject: "+subjectIndex);
+
+		console.log("\t---->set slideIndex to length -1")
+
+		slideIndex=jpgs[subjectIndex].entries.length-1;
+		
+	}
+	console.log("--->(3) slideIndex is now "+slideIndex)
+
+	//show next element
+	var element_to_show="subject"+subjectIndex+"_slide"+slideIndex;
+
+	console.log("setting element to show ( "+element_to_show+") to block");
+	console.log("\tsetting element to show ( subject"+subjectIndex+"_slide"+slideIndex+") to block");
+
+	document.getElementById(element_to_hide).style.display="none";
+	document.getElementById(element_to_show).style.display="block";
+	refreshDots();
+}
+
+function showImageOLD(currentSlide,nextSlide) {
 	var slides = document.getElementsByClassName("mySlides");
 	
 	//hide current slide
 
 
 	//set prior slide
-	previousSlide=slideIndex;
+	var previousSlide=slideIndex;
 	if (previousSlide > slides.length) { previousSlide = 1 }
 	if (previousSlide<1) { previousSlide=slides.length; }
 
@@ -125,24 +223,78 @@ function showImage(currentSlide,nextSlide) {
 	refreshDots();
 }
 
-function getSubject(s) {
-	console.log("current File: "+s);
-	parts=s.split('/');
-	console.log("\tcurrent Subject: "+parts[0]);
-	return parts[0];
-} 
+// function getSubject(s) {
+// 	console.log("current File: "+s);
+// 	parts=s.split('/');
+// 	console.log("\tcurrent Subject: "+parts[0]);
+// 	return parts[0];
+// } 
+// function nextSubjectOLD() {
+// 	paused_state=paused;
+	
+// 	pauseShow();
+
+// 	oldsubject=getSubject(jpgs[slideIndex]);
+// 	while (getSubject(jpgs[slideIndex])==oldsubject) {
+// 		goForwards();
+// 	}
+// 	goForwards();
+// 	paused=paused_state;
+// 	if(!paused) playShow();
+// }
 function nextSubject() {
-	paused_state=paused;
 	
 	pauseShow();
 
-	oldsubject=getSubject(jpgs[slideIndex]);
-	while (getSubject(jpgs[slideIndex])==oldsubject) {
-		goForwards();
-	}
-	goForwards();
-	paused=paused_state;
-	if(!paused) playShow();
+	var element_to_hide="subject"+subjectIndex+"_slide"+slideIndex;
+	document.getElementById(element_to_hide).style.display="none";
+
+	
+	subjectIndex++;
+	slideIndex=0;
+	
+	if(subjectIndex>jpgs.length-1) subjectIndex=0;
+	
+
+	$( '#subject-selector' ).val(subjectIndex);
+
+	showImage(0)
+	
+}
+
+function prevSubject() {
+	
+	pauseShow();
+
+	var element_to_hide="subject"+subjectIndex+"_slide"+slideIndex;
+	document.getElementById(element_to_hide).style.display="none";
+
+	
+	subjectIndex--;
+	slideIndex=0;
+	
+	if(subjectIndex<0) subjectIndex=jpgs.length-1;
+	
+
+	$( '#subject-selector' ).val(subjectIndex);
+
+	showImage(0)
+	
+}
+
+function changeSubject() {
+	pauseShow();
+
+	var element_to_hide="subject"+subjectIndex+"_slide"+slideIndex;
+	document.getElementById(element_to_hide).style.display="none";
+
+	
+	subjectIndex=$( '#subject-selector' ).val();
+	slideIndex=0;
+	
+	if(subjectIndex>jpgs.length-1) subjectIndex=0;
+
+	showImage(0)
 }
 
 function fixRes() {

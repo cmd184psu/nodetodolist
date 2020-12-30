@@ -11,15 +11,18 @@ var priorFilename="";
 var data=new Object;
 var maxVotes=0;
 var arrayOfContent=[];
+var lists=[]
 
-function LoadFile(filename) {
-	return new Promise((resolve, reject) => {
+var subjectListIndex=0
+var listIndex=0
+// function LoadFile(filename) {
+// 	return new Promise((resolve, reject) => {
 
-        $("#loaded").html(filename);
-
-        $.get(BASE+filename,"", function(result) { resolve(result); });
-    });
-}
+//         //$("#loaded").html(filename);
+//         console.log("attempting to load "+$('lists-selelctor'))
+//         $.get(BASE+filename,"", function(result) { resolve(result); });
+//     });
+// }
 function ajaxGet(uri) {
 	return new Promise((resolve, reject) => {
         $.get(uri,"", function(result) { resolve(result); });
@@ -421,6 +424,53 @@ function render() {
     console.log("future: "+formatedDate(future));
 }
 
+// function buildSubjectSelector(s,l) {
+//     $('#'+s)
+//     .find('option')
+//     .remove();
+//     var selector = document.getElementById(s);
+
+//     //loop through subjects (groups)
+//     for(var i=0; i<l.length; i++) {
+//         var opt = document.createElement('option');
+//         opt.innerHTML=l[i].subject;
+//         opt.value=i
+//         if(data.topic!=undefined && data.topic==l[i].subject) {
+//             subjectListIndex=i
+//         }
+//         selector.appendChild(opt);
+//         console.log("looking at "+(i+1)+" of "+l.length)
+//     } 
+//     $('#'+s).val(subjectListIndex);
+// }
+
+function rebuildListSelector(s,l,desired) {
+    console.log("rebuildListSelector("+s+",list,"+(desired || "none")+")");
+    $('#'+s)
+    .find('option')
+    .remove().end();
+    var selector = document.getElementById(s);
+    var retIndex=0
+    //loop through lists for this subject
+    for(var i=0; i<l.length; i++) {
+
+        var opt = document.createElement('option');
+        opt.innerHTML=l[i].subject || l[i];
+        opt.value=i;
+        console.log("===>adding "+opt.innerHTML+" as value "+opt.value)
+        if(desired!=undefined && desired==l[i]) {
+            retIndex=i
+        }
+
+        selector.appendChild(opt);
+        console.log("looking at "+(i+1)+" of "+l.length)
+    } 
+    console.log("val of "+s+": "+$('#'+s).val())
+    
+    $('#'+s).val(retIndex);
+    return retIndex;
+}
+
 async function loadit(filename) {
     if(filename==undefined) {
         data=await ajaxGet("config/");
@@ -429,9 +479,56 @@ async function loadit(filename) {
 
     priorFilename=currentFilename;
     currentFilename=filename;
-    arrayOfContent=JSON.parse(await LoadFile(filename));
-    if(data.prefix==undefined) render();
-    
+    var selected=0;
+    if(data.todo) {
+        console.log("TODO list mode")
+        lists=await ajaxGet("/items");
+
+        //buildSubjectSelector('subject-list-selector',lists)
+        
+        
+        //move to changeSubjectList():
+        subjectListIndex=rebuildListSelector('subject-list-selector',lists,data.topic)
+
+        changeSubjectList()
+
+
+        // var list_selector = document.getElementById('list-selector');
+        // //loop through lists for this subject
+        // for(var j=0; j<lists.length; j++) {
+        //     var opt2 = document.createElement('option');
+        //     opt2.innerHTML=lists[subjectListIndex].entries[j];
+        //     opt2.value=j;
+        //     if(data.topjson!=undefined && data.topjson==lists[subjectListIndex].entries[j]) {
+        //         listIndex=j
+        //     }
+
+        //     list_selector.appendChild(opt2);
+        //     console.log("looking at "+(j+1)+" of "+lists[subjectListIndex].entries.length)
+        // } 
+        // console.log("val of list-selector: "+$('#list-selector').val())
+        
+        // $('#list-selector').val(listIndex);
+
+        console.log("val of subject-list-selector: "+$('#subject-list-selector').val())
+        console.log("val of list-selector: "+$('#list-selector').val())
+        console.log("\tval of list-selector: "+listIndex)
+        console.log("total subjects: "+lists.length)
+        console.log("total lists in this subject: "+lists[$('#subject-list-selector').val()].entries.length)
+        
+
+
+
+        filename=lists[$('#subject-list-selector').val()].entries[$('#list-selector').val()]
+        console.log("ajax load filename: "+data.prefix+'/'+filename)
+
+        //arrayOfContent=[]
+        //var temp=await ajaxGet(data.prefix+'/'+filename);
+        //arrayOfContent=JSON.parse(temp)
+        render();
+    } else {
+        console.log("NOT todolist mode!!")
+    }
 }
 
 
@@ -456,4 +553,27 @@ function saveit() {
 function SaveAndLoad(newfilename) {
     SaveFile(currentFilename);
     loadit(newfilename);
+}
+
+async function changeList() {
+    console.log("list selected: "+ $( '#list-selector' ).val())
+
+
+    var filename=lists[$('#subject-list-selector').val()].entries[$('#list-selector').val()]
+    console.log("ajax load filename: "+data.prefix+'/'+filename)
+
+    //arrayOfContent=[]
+    var temp=await ajaxGet(data.prefix+'/'+filename);
+    arrayOfContent=JSON.parse(temp)
+    render();
+
+}
+
+function changeSubjectList() {
+
+    subjectListIndex=$('#subject-list-selector').val();
+
+    console.log("changeSubjectList(): fire rebuild list-selector")
+    listIndex=rebuildListSelector('list-selector',lists[subjectListIndex].entries,data.topjson)
+    changeList();
 }

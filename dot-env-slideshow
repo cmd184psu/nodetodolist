@@ -7,3 +7,4 @@ AUTH0_CALLBACK_URL=http://localhost:3000/callback
 PORT=8888
 INDEX=/slideshow.html
 PREFIX=nt
+EXT=jpg

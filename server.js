@@ -109,15 +109,16 @@ app.get('/config', function(req, res) {
 	if(process.env.PREFIX!="" && process.env.PREFIX!=undefined) {
 		content.prefix=process.env.PREFIX
 	}
-
-	if(req.query.pretty!=undefined) {
-		res.setHeader('Content-Type', 'plain/text');
-		res.setHeader('Content-Disposition','inline');
-		res.send(JSON.stringify(content,null,3));
-	} else {
-		res.setHeader('Content-Type', 'application/json');
-		res.send(content);
+	if(process.env.EXT!="" && process.env.EXT!=undefined) {
+		content.ext=process.env.EXT
 	}
+	if(process.env.TOPIC!="" && process.env.TOPIC!=undefined) {
+		content.topic=process.env.TOPIC
+	}
+	if(process.env.TODO!="" && process.env.TODO!=undefined) {
+		content.todo=(process.env.TODO=="true")
+	}
+	prettyPrint(req,res,content)
 	res.end();
 });
 
@@ -148,13 +149,14 @@ const rejects = new Set(['#recycle','css', 'js', 'node_modules', 'nodestuff', 'w
 
 
 app.get('/subjects/:subject',function(req,res) {
+	console.log("/subjects/{subject}")
 	var rootdir=process.env.PREFIX || 'nt'
-
+	var ext=process.env.EXT || 'jpg'
 
 	if(req.params!=undefined && req.params.subject!=undefined) {
 		//single subject use case
 		var entries=[]
-		entries=glob.sync(rootdir+'/'+req.params.subject+'/*.jpg').map(f => f.substr(rootdir.length+1))
+		entries=glob.sync(rootdir+'/'+req.params.subject+'/*.'+ext).map(f => f.substr(rootdir.length+1))
 		prettyPrint(req,res,entries)
 		res.end();
 	} else {
@@ -162,7 +164,7 @@ app.get('/subjects/:subject',function(req,res) {
 		const subjects = fs.readdirSync(rootdir); 
 		var dirlist=[];
 
-		//console.log("directories:"); 
+		console.log("directories:"); 
 		subjects.forEach(subject => { 
 			if(!rejects.has(subject) && fs.statSync(rootdir+'/'+subject).isDirectory()) {
 				var item=new Object;
@@ -178,15 +180,17 @@ app.get('/subjects/:subject',function(req,res) {
 })
 
 
-app.get('/jpgs',function(req,res) {
-	var rootdir=process.env.PREFIX || 'nt'
+app.get('/items',function(req,res) {
+	var rootdir=process.env.PREFIX || 'lists'
+
+	var ext=process.env.EXT || 'json'
 
 	const subjects = fs.readdirSync(rootdir); 
 	var dirlist=[];
 
-	//console.log("directories:"); 
+	console.log("directories:"); 
 	subjects.forEach(subject => { 
-		if(!rejects.has(subject) && fs.statSync(rootdir+'/'+subject).isDirectory()) {
+		if(!rejects.has(subject) && !subject.startsWith("_") && fs.statSync(rootdir+'/'+subject).isDirectory()) {
 			var item=new Object;
 			item.subject=subject;
 			item.entries=[];
@@ -194,17 +198,10 @@ app.get('/jpgs',function(req,res) {
 		}
 	})
 	for(var i=0; i<dirlist.length; i++) {
-		dirlist[i].entries=glob.sync(rootdir+'/'+dirlist[i].subject+'/*.jpg').map(f => f.substr(rootdir.length+1))
+		dirlist[i].entries=glob.sync(rootdir+'/'+dirlist[i].subject+'/*.'+ext).map(f => f.substr(rootdir.length+1))
 	}
 	prettyPrint(req,res,dirlist)
-	// if(req.query.pretty!=undefined) {
-	// 	res.setHeader('Content-Type', 'plain/text');
-	// 	res.setHeader('Content-Disposition','inline');
-	// 	res.send(JSON.stringify(dirlist,null,3));
-	// } else {
-	// 	res.setHeader('Content-Type', 'application/json');
-	// 	res.send(dirlist);
-	// }
+	
 	res.end();
 })
 
