@@ -17,6 +17,7 @@ require("dotenv").config();
 
 const express = require('express'), app = express(), port = process.env.PORT || 8000;
 const bodyParser = require('body-parser');
+const  glob = require('glob')
 let path = require('path');  
 const fs = require("fs");
 const https = require('https');
@@ -74,6 +75,16 @@ function btoa(data) {
 	return Buffer.from(data).toString('base64');
 }
 
+function prettyPrint(req, res, content) {
+	res.setHeader('Content-Type', 'application/json');
+	if(req.query!=undefined && req.query.pretty!=undefined) {
+		res.setHeader('Content-Type', 'text/plain');
+//		res.setHeader('Content-Disposition','inline');
+		res.send(JSON.stringify(content,null,3));
+	} else {
+		res.send(content);
+	}
+}
 
 //var flatdb=__dirname+"/data.json";
 
@@ -124,7 +135,78 @@ app.post('/config', function(req, res) {
 
 });
 
+const rejects = new Set(['#recycle','css', 'js', 'node_modules', 'nodestuff', 'webfonts'])
 
+
+// app.get('/subject/:subject',function(req,res) {
+// 	var rootdir=process.env.PREFIX || 'nt'
+
+// 	console.log("subject="+req.params.subject)
+	
+// })
+
+
+
+app.get('/subjects/:subject',function(req,res) {
+	var rootdir=process.env.PREFIX || 'nt'
+
+
+	if(req.params!=undefined && req.params.subject!=undefined) {
+		//single subject use case
+		var entries=[]
+		entries=glob.sync(rootdir+'/'+req.params.subject+'/*.jpg').map(f => f.substr(rootdir.length+1))
+		prettyPrint(req,res,entries)
+		res.end();
+	} else {
+		//send all subjects
+		const subjects = fs.readdirSync(rootdir); 
+		var dirlist=[];
+
+		//console.log("directories:"); 
+		subjects.forEach(subject => { 
+			if(!rejects.has(subject) && fs.statSync(rootdir+'/'+subject).isDirectory()) {
+				var item=new Object;
+				item.subject=subject;
+				item.entries=[];
+				dirlist.push(item)
+			}
+		})
+		prettyPrint(req,res,dirlist)
+		
+	}
+	res.end();
+})
+
+
+app.get('/jpgs',function(req,res) {
+	var rootdir=process.env.PREFIX || 'nt'
+
+	const subjects = fs.readdirSync(rootdir); 
+	var dirlist=[];
+
+	//console.log("directories:"); 
+	subjects.forEach(subject => { 
+		if(!rejects.has(subject) && fs.statSync(rootdir+'/'+subject).isDirectory()) {
+			var item=new Object;
+			item.subject=subject;
+			item.entries=[];
+			dirlist.push(item)
+		}
+	})
+	for(var i=0; i<dirlist.length; i++) {
+		dirlist[i].entries=glob.sync(rootdir+'/'+dirlist[i].subject+'/*.jpg').map(f => f.substr(rootdir.length+1))
+	}
+	prettyPrint(req,res,dirlist)
+	// if(req.query.pretty!=undefined) {
+	// 	res.setHeader('Content-Type', 'plain/text');
+	// 	res.setHeader('Content-Disposition','inline');
+	// 	res.send(JSON.stringify(dirlist,null,3));
+	// } else {
+	// 	res.setHeader('Content-Type', 'application/json');
+	// 	res.send(dirlist);
+	// }
+	res.end();
+})
 
 
 
