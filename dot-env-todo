@@ -1,9 +1,8 @@
-AUTH0_CLIENT_ID=...
-AUTH0_DOMAIN=dev-something.us.auth0.com
-AUTH0_CLIENT_SECRET=...
-SESSION_SECRET=...
-AUTH0_CALLBACK_URL=http://localhost:3000/callback
-
 PORT=8000
-TOPJSON=toptodolist.json
 INDEX=/todo.html
+PREFIX=lists
+EXT=json
+TODO=true
+#DEFAULTSUBJECT=home
+#DEFAULTITEM=home/index.json #test without subject
+AUTOSAVE=true  # saving is not enabled yet
