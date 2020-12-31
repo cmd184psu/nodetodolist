@@ -51,25 +51,8 @@ app.use((req, res, next) => {
     next();
 });
 
-var BASE='.';
-
-if(process.env.BASE!="" && process.env.BASE!=undefined) {
-	BASE=process.env.BASE;
-}
-
-
-const config_in_mem=JSON.parse(fs.readFileSync(BASE+'/data.json', 'utf8'));
-//const urlObject=URL.parse(config_in_mem.admin.endpoint);
-
-// if(urlObject.port!=undefined)   adminport=urlObject.port;
-// else {
-// 	if(urlObject.protocol=="https")   adminport=443;
-// 	else   adminport=80;
-	
-	
-// 	console.log("protocol: "+urlObject.protocol);
-// 	adminport=443;
-// }
+const BASE=process.env.BASE || '.';
+var config=JSON.parse(fs.readFileSync(BASE+'/data.json', 'utf8'));
 
 function btoa(data) {
 	return Buffer.from(data).toString('base64');
@@ -86,35 +69,31 @@ function prettyPrint(req, res, content) {
 	}
 }
 
-//var flatdb=__dirname+"/data.json";
-
-
-
 var flatdb=BASE+"/data.json";
 
 console.log("sending: "+flatdb);
 app.get('/config', function(req, res) {
-	var content=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
+	config=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
 	
-	if(process.env.TOPJSON!="" && process.env.TOPJSON!=undefined) {
-		content.topjson=process.env.TOPJSON
+	var content=new Object
+	content.defaultSubject=config.defaultSubject || process.env.DEFAULTSUBJECT || "home"
+
+	content.index=config.index || process.env.INDEX || "todo.html" //todo.html or slideshow.html
+	content.prefix=config.prefix || process.env.PREFIX || "lists" //list or nt
+	content.ext=config.ext || process.env.EXT || "json" //json or jpg
+
+	var di=config.defaultItem || process.env.DEFAULTITEM || ""
+
+	//if config and env have nothing for defaultsubject, we need to infer from defaultitem
+	if(config.defaultSubject==undefined && process.env.DEFAULTSUBJECT==undefined && di.includes("/")) {
+		content.defaultSubject=di.split('/')[0]
+		content.defaultItem=di
+	} else {
+		content.defaultItem=config.defaultItem || process.env.DEFAULTITEM || content.defaultSubject+"/index."+content.ext
 	}
 
-	if(process.env.JSONREPO!="" && process.env.JSONREPO!=undefined) {
-		content.jsonrepo=process.env.JSONREPO
-	}
-	if(process.env.INDEX!="" && process.env.INDEX!=undefined) {
-		content.index=process.env.INDEX
-	}
-	if(process.env.PREFIX!="" && process.env.PREFIX!=undefined) {
-		content.prefix=process.env.PREFIX
-	}
-	if(process.env.EXT!="" && process.env.EXT!=undefined) {
-		content.ext=process.env.EXT
-	}
-	if(process.env.TOPIC!="" && process.env.TOPIC!=undefined) {
-		content.topic=process.env.TOPIC
-	}
+	content.autosave=config.autosave || process.env.AUTOSAVE
+
 	if(process.env.TODO!="" && process.env.TODO!=undefined) {
 		content.todo=(process.env.TODO=="true")
 	}
@@ -137,15 +116,6 @@ app.post('/config', function(req, res) {
 });
 
 const rejects = new Set(['#recycle','css', 'js', 'node_modules', 'nodestuff', 'webfonts'])
-
-
-// app.get('/subject/:subject',function(req,res) {
-// 	var rootdir=process.env.PREFIX || 'nt'
-
-// 	console.log("subject="+req.params.subject)
-	
-// })
-
 
 
 app.get('/subjects/:subject',function(req,res) {
@@ -218,11 +188,14 @@ app.get("/*", function(request, response) {
 		index_html=process.env.INDEX;
 	}
 
-	var contentType="text/html";	
+	var contentType="text/plain";	
 	if(request.url.toString()=="/") {
 		url=index_html;
+		contentType="text/html";
 	} else if(request.url.toString().endsWith(".js")){
 		contentType="text/javascript";
+	} else if(request.url.toString().endsWith(".json")){
+		contentType="application/json";
 	 } else if(request.url.toString().endsWith(".html")){
 		contentType="text/html";
 	 } else if(request.url.toString().endsWith(".png")){
@@ -277,17 +250,6 @@ app.post("/*", function(request, response) {
 	response.end();
 
 })
-
-// console.log("writing file!");
-// 	var data=req.body;
-// 	fs.writeFile(flatdb, JSON.stringify(data), function (err) {
-//     	if( err ) {
-//     		console.log( err );
-//     	} else {
-//     		JSON.stringify(data,null,2);
-//     	}
-//     });
-// 	res.end();
 
 app.listen(port);
 
