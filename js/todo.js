@@ -1,53 +1,72 @@
 var config=new Object;
 var arrayOfContent=[];
 var lists=[]
-//var subjectIndex=0
-//var listIndex=0
+
 const item_list_selector='item-list-selector'
 const subject_list_selector='subject-list-selector'
 var currentFilename=undefined
+var previousFilename=undefined
 
+const DEBUG=true
 
-const DEBUG=false
+const skipsave=false
+const restrictedsave=false
+
+//const BASE='lists/'
 
 function SaveList(content,filename) {
-    $('#saveButton').prop('disabled', true);
-    if(skipsave) {
-        console.log("---- SKIPPING SAVE, for safety! ------")    
-        return
-    }
-    console.log("SaveFile("+filename+");");
-
-    dropVars();
-    console.log(JSON.stringify(content,null,3));
     if(filename==undefined) {
         throw error
         //return
     }
+    DEBUG && console.log("SaveList(...content...,"+filename+");");
+    $('#saveButton').prop('disabled', true);
+
+    if(restrictedsave) {
+        console.log("-- RESTRICTED SAVE MODE, for safety! --")    
+        if(!filename.includes("test")) {
+            $('#saveButton').prop('disabled', false);
+            return
+        }
+    }
+
+    if(skipsave) {
+        console.log("-- SKIPPING SAVE, for safety! --")    
+        $('#saveButton').prop('disabled', false);
+        return
+    }
+    
+    dropVars(); //potential bug; this function works on arrayOfContent global rather than content local
+    DEBUG && console.log(JSON.stringify(content,null,3));
+    
+    DEBUG && console.log("OVERWRITING your data in "+filename);
 
     $.ajax({
-		url: BASE+filename,
-		type: 'post',
-		dataType: 'text',
-		contentType: 'application/json',
-		success: function (data) {
-			console.log(JSON.stringify(data));
-			//$("#saveload-content-changeme").html("<strong>Saved</strong>");
-			//setTimeout(function() { onClickCloseSaveLoadDialog() }, SAVE_LOAD_DIALOG_DELAY); //done
-        },
-        data: JSON.stringify(content),
-        error: function(data){
-            alert('error');
-        	console.log(JSON.stringify(data,null,3));
-        }
+        url: 'items/'+filename,  //relative target route
+        type: 'post',  //method
+        dataType: 'json',  //type to receive... json
+        contentType: 'application/json', //contenttype to send
+        success: function (data) {
+           $('#saveButton').prop('disabled', false);
+           console.log("success in saving content for filename: "+this.url)
+           alert(data.msg)
+       },
+       data: JSON.stringify(content), // content to send; has to be stringified, even though it's application/json
+       error: function(err){   //something bad happened and ajax is unhappy
+            console.log(JSON.stringify(err,null,3));
+            alert(err.responseJSON.error);
+       }
 
-    }).done(function(data) {
-        //$("#saveload-content-changeme").html("<strong>Saved</strong>");
-        console.log("done");
-        //re-enable save button
-        $('#saveButton').prop('disabled', false);
-        
-    });
+   }).done(function(data) {
+       console.log("done");
+       //re-enable save button
+       $('#saveButton').prop('disabled', false);
+       
+   });
+}
+
+function saveit() {
+    if(currentFilename!=undefined) SaveList(arrayOfContent,currentFilename);
 }
 
 
@@ -59,7 +78,7 @@ async function SelectNewFile(nf) {
     console.log("====SelectNewFile("+nf+")")
     
     
-    
+    var p=currentFilename;
     console.log("\tcurrent file is "+currentFilename)
     console.log("\tselected file is "+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()])
 
@@ -110,9 +129,13 @@ async function SelectNewFile(nf) {
     if(currentFilename!=undefined && config.autosave) SaveList(arrayOfContent,currentFilename);
  
 
-    arrayOfContent=await ajaxGet(config.prefix+'/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
+    arrayOfContent=await ajaxGetJSON('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
     currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()];
     render();
+
+    $("#backBTN").prop("disabled",p==currentFilename);
+    if(p==currentFilename) previousFilename=undefined;
+    else previousFilename=p;
 }
 
 function SaveAndLoad(newfilename) {
@@ -169,13 +192,20 @@ function SelectNewSubject(newsubject,newfile) {
 
 }
 
+function revertList() {
+    if(previousFilename!=undefined) {
+        console.log("calling SelectNewFile("+previousFilename+")")
 
+        SelectNewFile(previousFilename);
+    }
+    $("#backBTN").prop("disabled",true);
+}
 async function startTodo() {
     //load /config into memory
-	config=await ajaxGet("config/");
+	config=await ajaxGetJSON("config/");
 
 	//load items into memory
-	lists=await ajaxGet("items/");
+	lists=await ajaxGetJSON("items");
 
 	//render selectors
     DEBUG && console.log("config.defaultSubject="+config.defaultSubject)
@@ -186,8 +216,10 @@ async function startTodo() {
 
     //load default topic and json
     currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()] 
-    DEBUG && console.log("loading: "+config.prefix+"/"+currentFilename)
-    arrayOfContent=await ajaxGet(config.prefix+"/"+currentFilename)
+    previousFilename=undefined // on purpose, also disable back button
+    $("#backBTN").prop("disabled",true);
+    DEBUG && console.log("loading: "+currentFilename)
+    arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
 
 	//render it
 	render();

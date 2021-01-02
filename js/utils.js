@@ -1,5 +1,5 @@
 
-const BASE='lists/'
+
 const COOLDOWN_TIME=600000
 const AUTO_SAVE_ENABLED=false
 const AUTO_SAVE_PERIOD=60000
@@ -7,14 +7,13 @@ const VOTES_TO_CAST=100
 
 
 var currentFilename="";
-var priorFilename="";
-var data=new Object;
-var maxVotes=0;
-var arrayOfContent=[];
-var lists=[]
 
-var subjectListIndex=0
-var listIndex=0
+
+var priorFilename="";
+var maxVotes=0;
+
+const DEBUG_UTILS=false
+
 // function LoadFile(filename) {
 // 	return new Promise((resolve, reject) => {
 
@@ -28,6 +27,14 @@ function ajaxGet(uri) {
         $.get(uri,"", function(result) { resolve(result); });
     });
 }
+
+function ajaxGetJSON(uri) {
+    return new Promise((resolve, reject) => {
+        fetch(uri).then(async (response)=> {
+            resolve(await response.json())
+        })
+    })
+}    
 
 function dropVars() {
     for(var i=0; i<arrayOfContent.length; i++) {
@@ -48,39 +55,8 @@ function clearWinner() {
     }
 }
 
-//FIXME: incomplete!
-function SaveFile(filename) {
-    $('#saveButton').prop('disabled', true);
-    console.log("SaveFile("+filename+");");
 
-    dropVars();
-    console.log(JSON.stringify(arrayOfContent,null,3));
-    
 
-    $.ajax({
-		url: BASE+filename,
-		type: 'post',
-		dataType: 'text',
-		contentType: 'application/json',
-		success: function (data) {
-			console.log(JSON.stringify(data));
-			//$("#saveload-content-changeme").html("<strong>Saved</strong>");
-			//setTimeout(function() { onClickCloseSaveLoadDialog() }, SAVE_LOAD_DIALOG_DELAY); //done
-        },
-        data: JSON.stringify(arrayOfContent),
-        error: function(data){
-            alert('error');
-        	console.log(JSON.stringify(data,null,3));
-        }
-
-    }).done(function(data) {
-        //$("#saveload-content-changeme").html("<strong>Saved</strong>");
-        console.log("done");
-        //re-enable save button
-        $('#saveButton').prop('disabled', false);
-        
-    });
-}
 
 function calcValue(v,tv) {
     return v/tv;
@@ -389,15 +365,23 @@ function vote() {
     maxVotes=0;
     render();
 }
+
+//render currently loaded content
+//also demonstrates how to use QUIET_LOCAL vs DEBUG_UTILS correctly
 function render() {
+    var QUIET_LOCAL=!DEBUG_UTILS && true
+
+    //console.log("---> render()::QUIET_LOCAL="+QUIET_LOCAL)
+    //console.log("---> render()::DEBUG_UTILS="+DEBUG_UTILS)
+
     var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Period (in days)</th><th>Next Due Date</th><th>Cooldown</th></tr>";
-    console.log("length of array="+arrayOfContent.length);
+    QUIET_LOCAL || console.log("length of array="+arrayOfContent.length);
     //console.log(JSON.stringify(arrayOfContent,null,3));
     for(var i=0; i<arrayOfContent.length; i++) {
         content+=renderRow(i);
 		// for recurring expiration
     	if(arrayOfContent[i].periodic!=undefined && arrayOfContent[i].periodic) {
-			console.log("==>"+i+"th can expire");    
+			QUIET_LOCAL || console.log("==>"+i+"th can expire");    
 
 			//new variables:
 			//periodic - boolean; if true, this item is a recurring item
@@ -405,12 +389,12 @@ function render() {
 			//period   - duration between due dates in days		
 
             if(isDueNow(arrayOfContent[i].nextDue)) {
-                console.log("\tdue now and again in "+arrayOfContent[i].period+" days");
+                QUIET_LOCAL || console.log("\tdue now and again in "+arrayOfContent[i].period+" days");
             } else {
-				console.log("\tdue in the future: "+EpocMStoISODate(arrayOfContent[i].nextDue));
+                QUIET_LOCAL || console.log("\tdue in the future: "+EpocMStoISODate(arrayOfContent[i].nextDue));
 			} 
 		} else {
-			console.log("==>"+i+"th does not expire");
+			QUIET_LOCAL || console.log("==>"+i+"th does not expire");
 		}
     }
 
@@ -419,33 +403,14 @@ function render() {
     // for cooldown
     var now=new Date();
     var future=new Date(60000+now.getTime());
-    console.log("==== "+(future.getUTCMilliseconds()-now.getUTCMilliseconds()));
-    console.log("now: "+formatedDate(now));
-    console.log("future: "+formatedDate(future));
+    QUIET_LOCAL || console.log("==== "+(future.getUTCMilliseconds()-now.getUTCMilliseconds()));
+    QUIET_LOCAL || console.log("now: "+formatedDate(now));
+    QUIET_LOCAL || console.log("future: "+formatedDate(future));
 }
 
-// function buildSubjectSelector(s,l) {
-//     $('#'+s)
-//     .find('option')
-//     .remove();
-//     var selector = document.getElementById(s);
-
-//     //loop through subjects (groups)
-//     for(var i=0; i<l.length; i++) {
-//         var opt = document.createElement('option');
-//         opt.innerHTML=l[i].subject;
-//         opt.value=i
-//         if(data.topic!=undefined && data.topic==l[i].subject) {
-//             subjectListIndex=i
-//         }
-//         selector.appendChild(opt);
-//         console.log("looking at "+(i+1)+" of "+l.length)
-//     } 
-//     $('#'+s).val(subjectListIndex);
-// }
-
 function rebuildListSelector(s,l,desired) {
-    console.log("rebuildListSelector("+s+",list,"+(desired || "none")+")");
+    const DEBUG_LOCAL=DEBUG_UTILS || false
+    DEBUG_LOCAL && console.log("==>rebuildListSelector("+s+",list,"+(desired || "none")+")");
     $('#'+s)
     .find('option')
     .remove().end();
@@ -457,123 +422,17 @@ function rebuildListSelector(s,l,desired) {
         var opt = document.createElement('option');
         opt.innerHTML=l[i].subject || l[i];
         opt.value=i;
-        console.log("===>adding "+opt.innerHTML+" as value "+opt.value)
-        if(desired!=undefined && desired==l[i]) {
+        DEBUG_LOCAL && console.log("===>adding "+opt.innerHTML+" as value "+opt.value)
+        DEBUG_LOCAL && console.log("comparing "+l[i]+" vs "+desired)
+        if(desired!=undefined && (desired==l[i] || desired==l[i].subject)) {
             retIndex=i
         }
 
         selector.appendChild(opt);
-        console.log("looking at "+(i+1)+" of "+l.length)
+        DEBUG_LOCAL && console.log("looking at "+(i+1)+" of "+l.length)
     } 
-    console.log("val of "+s+": "+$('#'+s).val())
+    DEBUG_LOCAL && console.log("val of "+s+": "+$('#'+s).val())
     
     $('#'+s).val(retIndex);
     return retIndex;
-}
-
-async function loadit(filename) {
-    if(filename==undefined) {
-        data=await ajaxGet("config/");
-        filename=data.topjson;
-    }
-
-    priorFilename=currentFilename;
-    currentFilename=filename;
-    var selected=0;
-    if(data.todo) {
-        console.log("TODO list mode")
-        lists=await ajaxGet("/items");
-
-        //buildSubjectSelector('subject-list-selector',lists)
-        
-        
-        //move to changeSubjectList():
-        subjectListIndex=rebuildListSelector('subject-list-selector',lists,data.topic)
-
-        changeSubjectList()
-
-
-        // var list_selector = document.getElementById('list-selector');
-        // //loop through lists for this subject
-        // for(var j=0; j<lists.length; j++) {
-        //     var opt2 = document.createElement('option');
-        //     opt2.innerHTML=lists[subjectListIndex].entries[j];
-        //     opt2.value=j;
-        //     if(data.topjson!=undefined && data.topjson==lists[subjectListIndex].entries[j]) {
-        //         listIndex=j
-        //     }
-
-        //     list_selector.appendChild(opt2);
-        //     console.log("looking at "+(j+1)+" of "+lists[subjectListIndex].entries.length)
-        // } 
-        // console.log("val of list-selector: "+$('#list-selector').val())
-        
-        // $('#list-selector').val(listIndex);
-
-        console.log("val of subject-list-selector: "+$('#subject-list-selector').val())
-        console.log("val of list-selector: "+$('#list-selector').val())
-        console.log("\tval of list-selector: "+listIndex)
-        console.log("total subjects: "+lists.length)
-        console.log("total lists in this subject: "+lists[$('#subject-list-selector').val()].entries.length)
-        
-
-
-
-        filename=lists[$('#subject-list-selector').val()].entries[$('#list-selector').val()]
-        console.log("ajax load filename: "+data.prefix+'/'+filename)
-
-        //arrayOfContent=[]
-        //var temp=await ajaxGet(data.prefix+'/'+filename);
-        //arrayOfContent=JSON.parse(temp)
-        render();
-    } else {
-        console.log("NOT todolist mode!!")
-    }
-}
-
-
-
-// function NOPEinitAutoSave() {
-//     if(AUTO_SAVE_ENABLED) {
-//         console.log("doing auto-save...")
-//         setTimeout(function() { 
-//             console.log("=============================================")
-//             console.log("calling saveit()...")
-//             saveit();
-//             console.log("reinstalling initAutoSave() recursively...")
-
-//             initAutoSave(); 
-//          }, AUTO_SAVE_PERIOD); //done
-//     }
-// }
-
-function saveit() {
-    SaveFile(currentFilename);
-}
-function SaveAndLoad(newfilename) {
-    SaveFile(currentFilename);
-    loadit(newfilename);
-}
-
-async function changeList() {
-    console.log("list selected: "+ $( '#list-selector' ).val())
-
-
-    var filename=lists[$('#subject-list-selector').val()].entries[$('#list-selector').val()]
-    console.log("ajax load filename: "+data.prefix+'/'+filename)
-
-    //arrayOfContent=[]
-    var temp=await ajaxGet(data.prefix+'/'+filename);
-    arrayOfContent=JSON.parse(temp)
-    render();
-
-}
-
-function changeSubjectList() {
-
-    subjectListIndex=$('#subject-list-selector').val();
-
-    console.log("changeSubjectList(): fire rebuild list-selector")
-    listIndex=rebuildListSelector('list-selector',lists[subjectListIndex].entries,data.topjson)
-    changeList();
 }

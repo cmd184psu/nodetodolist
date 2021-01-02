@@ -15,18 +15,22 @@
 	<script src="js/jquery-ui.js"></script>
 	<!-- script src="js/constants.js"></script> -->
 	<script src="js/utils.js"></script>
+	<script src="js/todo.js"></script>
 	<script>
 		$(document).ready(function(){
+			startTodo()
+			
 			console.log("document ready");
-			//initAutoSave();
 		});
 	</script>
 </head>
 
-<body onload="loadit()">
+<body>
 	<strong>Vote!</strong>
-	<div id="loadedSubject">Subject: <select id="subject-list-selector" onchange="changeSubjectList()"></select></div>
-	<div id="loadedList">List: <select id="list-selector" onchange="changeList()"></select></div>
+	<div id="titleDiv" style="display:none">Title: not implemented</div>
+	<div id="loadedSubject">Subject: <select id="subject-list-selector" onchange="changeSubject()"></select></div>
+	<div id="loadedList">List: <select id="item-list-selector" onchange="changeItem()"></select></div>
+	<div><button id="backBTN" onclick="revertList()">Go Back</button></div>
 	<!-- Total Vote Count: <input type=text id="voteCount" value="100" /><BR>-->
 	<table id="thetable" border=1>
 	</table>

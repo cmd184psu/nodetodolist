@@ -91,8 +91,8 @@ app.get('/config', function(req, res) {
 	} else {
 		content.defaultItem=config.defaultItem || process.env.DEFAULTITEM || content.defaultSubject+"/index."+content.ext
 	}
-
-	content.autosave=config.autosave || process.env.AUTOSAVE
+	
+	content.autosave=(config.autosave || (process.env.AUTOSAVE && process.env.AUTOSAVE.toString().toLowerCase().trim().startsWith("true")))
 
 	if(process.env.TODO!="" && process.env.TODO!=undefined) {
 		content.todo=(process.env.TODO=="true")
@@ -150,7 +150,7 @@ app.get('/subjects/:subject',function(req,res) {
 })
 
 
-app.get('/items',function(req,res) {
+function getAllItems(req,res) {
 	var rootdir=process.env.PREFIX || 'lists'
 
 	var ext=process.env.EXT || 'json'
@@ -173,15 +173,96 @@ app.get('/items',function(req,res) {
 	prettyPrint(req,res,dirlist)
 	
 	res.end();
-})
+}
 
 
+app.get('/items', function(req,res) { getAllItems(req,res) });
+
+app.get('/items/:subject/:item',function(req,res) {
+	const { headers } = req;
+	if(req.params==undefined || req.params.item==undefined) {
+		return getAllItems(req,res);
+	}
+	console.log("requested item: "+process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item)
 
 
-app.get("/*", function(request, response) {
+	sendFileContent(res, process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item, 'application/json');
+	//res.end();
+});
 
-	var url=request.url;
+
+app.post('/items/:subject/:item',function(req,res) {
+	console.log("app.post(/items/{subject}/{item}")
+	const { headers } = req;
+
+	//if(headers['content-type']!="applicaiton/json" || 
+	if(req.params==undefined || req.params.subject==undefined || req.params.item==undefined) {
+		console.log("REJECTED: "+req.url+" with content-type "+headers['content-type'])
+		res.status(400).send({ error: 'Invalid Request' })
+		res.end();
+		return
+	}
+	console.log("content-type: "+headers['content-type'])
+	var filename=process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item
+
+	try {
+		if (!fs.existsSync(filename)) {
+			console.log("requested item: "+filename+" does not exist")
+			res.status(404).send({ error: 'invalid request' })
+			res.end();
+			return		  //file exists
+		}
+
+		//file exists, ok to continue
+	} catch(err) {
+		console.error(err)
+		res.status(500).send({ error: 'error checking file existence' })
+		res.end();
+		return
+	}
+
+	//don't need this, the content-type protects us (maybe?)
+	var body=undefined
+	try {
+		body=JSON.parse(JSON.stringify(req.body))
+	} catch(err) {
+		console.error(err)
+		res.status(405).send({ error: 'parse error: content is not json' })
+		res.end();
+		return	
+	}
+
+	console.log("About to write: "+filename)
+	console.log("==== begin content ====")
+	console.log(JSON.stringify(body,null,3))
+	console.log("====  end content  ====")
+	try{ 
+		fs.writeFileSync(filename, JSON.stringify(body,null,3));
+		res.send({ msg: 'File '+filename+' written successfully.'})
+	} catch(err) {
+		if( err ) {
+			console.error( err );
+			res.status(400).send({ error: 'unable to write to file '+filename })
+			
+		}
+	}
+	res.end();
+});
+
+function ENVvaristrue(m) {
+	return m && (m.toString().trim().toLowerCase().startsWith('true'))
+}
+app.get("/*", function(req, res) {
+	var url=req.url;
+	console.log("Requested URL is: " + url)
 	
+	if(ENVvaristrue(process.env.STRICT) && (url.startsWith(process.env.PREFIX) || url.startsWith("/"+process.env.PREFIX))) {
+		console.log("REJECTED:"+url)
+		res.status(403).send({ error: 'Permission Denied' })
+		res.end();
+		return;
+	} 
+
 	var index_html="/index.html";
 
 	if(process.env.INDEX!="" && process.env.INDEX!=undefined) {
@@ -189,30 +270,30 @@ app.get("/*", function(request, response) {
 	}
 
 	var contentType="text/plain";	
-	if(request.url.toString()=="/") {
+	if(req.url.toString()=="/") {
 		url=index_html;
 		contentType="text/html";
-	} else if(request.url.toString().endsWith(".js")){
+	} else if(url.endsWith(".js")){
 		contentType="text/javascript";
-	} else if(request.url.toString().endsWith(".json")){
+	} else if(url.endsWith(".json")){
 		contentType="application/json";
-	 } else if(request.url.toString().endsWith(".html")){
+	 } else if(url.endsWith(".html")){
 		contentType="text/html";
-	 } else if(request.url.toString().endsWith(".png")){
+	 } else if(url.endsWith(".png")){
 		contentType="image/png";
-	} else if(request.url.toString().endsWith(".jpg")){
+	} else if(url.endsWith(".jpg")){
 		contentType="image/jpg";
-	} else if(request.url.toString().endsWith(".woff")){
+	} else if(url.endsWith(".woff")){
 		contentType="font/woff";
-	 } else if(request.url.toString().endsWith(".woff2")){
+	 } else if(url.endsWith(".woff2")){
 		contentType="font/woff2";
-	} else if(request.url.toString().endsWith(".tff")){
+	} else if(url.endsWith(".tff")){
 		contentType="font/ttf";
-	} else if(request.url.toString().endsWith(".css")){
+	} else if(url.endsWith(".css")){
 		contentType="text/css";
 	} 
 	console.log("Requested URL is: " + url + " with contentType "+contentType);
-	sendFileContent(response, url.toString().substring(1), contentType);
+	sendFileContent(res, process.cwd()+url, contentType);
 })
 
 function sendFileContent(response, fileName, contentType){
@@ -229,28 +310,5 @@ function sendFileContent(response, fileName, contentType){
 	});
 }
 
-app.post("/*", function(request, response) {
-
-	var url=request.url;
-	
-	var data=request.body;
-
-	console.log("writing to "+url);
-
-	console.log(JSON.stringify(data,null,3));
-
-
- 	fs.writeFile('.'+url, JSON.stringify(data,null,3), function (err) {
-     	if( err ) {
-     		console.log( err );
-     	} else {
-     		JSON.stringify(data,null,2);
-     	}
-     });
-	response.end();
-
-})
-
 app.listen(port);
-
-console.log('(NodeJS Todolist) RESTful API server started on: ' + port);
+console.log('(NodeJS Todolist/Slideshow engine) RESTful API server started on: ' + port);
