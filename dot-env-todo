@@ -4,5 +4,11 @@ PREFIX=lists
 EXT=json
 TODO=true
 #DEFAULTSUBJECT=home
+#DEFAULTSUBJECT=work
+#not implemented yet
+#RESTRICTSUBJECT=work
 #DEFAULTITEM=home/index.json #test without subject
-AUTOSAVE=true  # saving is not enabled yet
+# saving is not enabled yet
+AUTOSAVE=false
+# prevent web server from serving individual items
+STRICT=true
