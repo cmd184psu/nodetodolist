@@ -2,3 +2,4 @@ PORT=8888
 INDEX=/slideshow.html
 PREFIX=nt
 EXT=jpg
+STRICT=false

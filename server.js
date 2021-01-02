@@ -104,16 +104,62 @@ app.get('/config', function(req, res) {
 app.post('/config', function(req, res) {
 	console.log("writing file!");
 	var data=req.body;
-	fs.writeFile(flatdb, JSON.stringify(data), function (err) {
-    	if( err ) {
-    		console.log( err );
-    	} else {
-    		JSON.stringify(data,null,2);
-    	}
-    });
-	res.end();
 
+	console.log("received content:")
+	console.log(JSON.stringify(data))
+	console.log("want to write it to "+flatdb)
+
+	const { headers } = req;
+
+	//if(headers['content-type']!="applicaiton/json" || 
+	
+	console.log("content-type: "+headers['content-type'])
+	var filename=process.cwd()+"/data.json"
+
+	try {
+		if (!fs.existsSync(filename)) {
+			console.log("requested item: "+filename+" does not exist")
+			res.status(404).send({ error: 'invalid request' })
+			res.end();
+			return		  //file exists
+		}
+
+		//file exists, ok to continue
+	} catch(err) {
+		console.error(err)
+		res.status(500).send({ error: 'error checking file existence' })
+		res.end();
+		return
+	}
+
+	//don't need this, the content-type protects us (maybe?)
+	var body=undefined
+	try {
+		body=JSON.parse(JSON.stringify(req.body))
+	} catch(err) {
+		console.error(err)
+		res.status(405).send({ error: 'parse error: content is not json' })
+		res.end();
+		return	
+	}
+
+	console.log("About to write: "+filename)
+	console.log("==== begin content ====")
+	console.log(JSON.stringify(body,null,3))
+	console.log("====  end content  ====")
+	try{ 
+		fs.writeFileSync(filename, JSON.stringify(body,null,3));
+		res.send({ msg: 'File '+filename+' written successfully.'})
+	} catch(err) {
+		if( err ) {
+			console.error( err );
+			res.status(400).send({ error: 'unable to write to file '+filename })
+			
+		}
+	}
+	res.end();
 });
+
 
 const rejects = new Set(['#recycle','css', 'js', 'node_modules', 'nodestuff', 'webfonts'])
 
@@ -167,11 +213,20 @@ function getAllItems(req,res) {
 			dirlist.push(item)
 		}
 	})
+	var configchange=false;
 	for(var i=0; i<dirlist.length; i++) {
 		dirlist[i].entries=glob.sync(rootdir+'/'+dirlist[i].subject+'/*.'+ext).map(f => f.substr(rootdir.length+1))
+		if(dirlist[i].entries.length==0) {
+			dirlist[i].entries.push("no-elements")
+			if(config.deleted==undefined) config.deleted=[]
+			config.deleted.push(dirlist[i].entries.subject)
+			configchange=true
+		}
 	}
 	prettyPrint(req,res,dirlist)
-	
+	if(configchange) {
+		console.log("need to save changes")
+	} 
 	res.end();
 }
 
@@ -183,7 +238,7 @@ app.get('/items/:subject/:item',function(req,res) {
 	if(req.params==undefined || req.params.item==undefined) {
 		return getAllItems(req,res);
 	}
-	console.log("requested item: "+process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item)
+	//console.log("requested item: "+process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item)
 
 
 	sendFileContent(res, process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item, 'application/json');
@@ -254,7 +309,6 @@ function ENVvaristrue(m) {
 }
 app.get("/*", function(req, res) {
 	var url=req.url;
-	console.log("Requested URL is: " + url)
 	
 	if(ENVvaristrue(process.env.STRICT) && (url.startsWith(process.env.PREFIX) || url.startsWith("/"+process.env.PREFIX))) {
 		console.log("REJECTED:"+url)
@@ -293,6 +347,7 @@ app.get("/*", function(req, res) {
 		contentType="text/css";
 	} 
 	console.log("Requested URL is: " + url + " with contentType "+contentType);
+	
 	sendFileContent(res, process.cwd()+url, contentType);
 })
 
