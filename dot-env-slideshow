@@ -1,5 +1,6 @@
 PORT=8888
 INDEX=/slideshow.html
+#PREFIX=nice
 PREFIX=nt
 EXT=jpg
 STRICT=false
