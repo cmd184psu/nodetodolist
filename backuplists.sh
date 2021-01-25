@@ -1,8 +1,16 @@
 #!/bin/sh
 
+
+LIST_PREFIX=$1
+
+if [ -z "$LIST_PREFIX" ]; then
+	LIST_PREFIX="archive-lists"
+fi
+
+
 # step one, create encrypted backup of lists
 echo ".... Archving lists with encryption ...."
-(cd lists && encdir.sh json ../archive-lists.tgz | sh)
+(cd lists && encdir.sh json ../${LIST_PREFIX}.tgz | sh)
 echo
 
 echo ".... Fixing Name ...."
@@ -13,7 +21,7 @@ if [ -z "$M" ]; then
     exit 1
 fi
 
-multiren -filename archive-lists.tgz.enc | sh
+multiren -filename ${LIST_PREFIX}.tgz.enc | sh
 echo
 
 echo ".... Moving to G-drive ...."
@@ -32,5 +40,5 @@ if ! [ -e ${GDRIVE}/todoarch/ ]; then
     exit 1
 fi
 
-mv -vf archive-lists*.tgz.enc ${GDRIVE}/todoarch/
+mv -vf ${LIST_PREFIX}*.tgz.enc ${GDRIVE}/todoarch/
 
