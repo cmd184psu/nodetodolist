@@ -205,12 +205,45 @@ function getAllItems(req,res) {
 	var dirlist=[];
 
 	console.log("directories:"); 
-	subjects.forEach(subject => { 
-		if(!rejects.has(subject) && !subject.startsWith("_") && fs.statSync(rootdir+'/'+subject).isDirectory()) {
+
+	var rightnow=new Date();
+
+	var allowedAge=process.env.AGE || 30; // default is to disallow pics older than 30 days
+	var unrestrictedAge=process.env.UNRESTRICTED;
+	var lenrestricted=process.env.DIRLISTRESTRICTEDLEN;
+
+
+	if(lenrestricted==undefined) lenrestricted=subjects.length;
+
+	console.log("lenrestricted = "+lenrestricted)
+
+	//lenrestricted=15;
+	//unrestrictedAge=true;
+	subjects.slice(0,lenrestricted).forEach(subject => { 
+		const stats=fs.statSync(rootdir+'/'+subject);
+		const stats2=fs.existsSync(rootdir+'/_'+subject)
+		if(!rejects.has(subject) && !subject.startsWith("_") && stats.isDirectory() && !stats2) {
 			var item=new Object;
 			item.subject=subject;
+			item.timestamp=stats.mtime.getTime();
+			//console.log("item.timestamp="+item.timestamp);
 			item.entries=[];
-			dirlist.push(item)
+
+			// reject if older than x days ago
+			// x=60
+			// y=60 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds
+			//var d=; //d=60
+			//console.log("comparing "+rightnow.getTime()+"-"+stats.mtime.getTime()+" with "+(allowedAge * 86400000))
+			//console.log("\tcomparing "+(rightnow.getTime()-stats.mtime.getTime())+" with "+(allowedAge * 86400000))
+			item.age=(rightnow.getTime()-stats.mtime.getTime())/86400000;
+			if(unrestrictedAge || rightnow.getTime()-stats.mtime.getTime()< allowedAge * 86400000) {
+				//console.log("\tallowing it");
+				dirlist.push(item)
+			} 
+			// else {
+			// 	console.log("\trejecting subject "+subject+" as too old")
+			// }
+
 		}
 	})
 	var configchange=false;
