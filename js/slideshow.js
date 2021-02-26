@@ -68,7 +68,8 @@ function showImage(newslideIndex) {
 		if(s>jpgs.length-1) s=0;
 		console.log("====== new subject: "+s)
 		slideIndex=0;
-		$('#'+subject_selector).val(s)
+		$('#'+subject_selector).val(Number(s))
+		loadCurrentSubject();
 	}
 
 	if(slideIndex<0) {
@@ -78,25 +79,31 @@ function showImage(newslideIndex) {
 		if(s<0) {
 			s=jpgs.length-1;
 		}	
-		$('#'+subject_selector).val(s)
+		$('#'+subject_selector).val(Number(s))
+		loadCurrentSubject();
 		console.log("\t--->revert subject: "+$('#'+subject_selector).val());
 		console.log("\t---->set slideIndex to length -1")
 		slideIndex=jpgs[$('#'+subject_selector).val()].entries.length-1;
 	}
 	
 	//show next element
-	var element_to_show="subject"+$('#'+subject_selector).val()+"_slide"+slideIndex;
+	var element_to_show="subject_slide"+slideIndex;
 	console.log("setting element to show ( "+element_to_show+") to block");
-	console.log("\tsetting element to show ( subject"+$('#'+subject_selector).val()+"_slide"+slideIndex+") to block");
+	console.log("\tsetting element to show ( subject_slide"+slideIndex+") to block");
 
-	if(element_to_hide!=undefined) document.getElementById(element_to_hide).style.display="none";
-	
+	if(element_to_hide!=undefined) {
+		console.log("want to hide:")
+		console.log("\t"+element_to_hide)	
+		if(document.getElementById(element_to_hide)!=null && document.getElementById(element_to_hide).style!=null) {
+			document.getElementById(element_to_hide).style.display="none";
+		}
+	}
 	try {
 		if(element_to_show!=undefined) {
 			document.getElementById(element_to_show).style.display="block";
 		} else {
 			console.log("element to show should not be undefined")
-			console.log("it should be: subject"+$('#'+subject_selector).val()+"_slide"+slideIndex)
+			console.log("it should be: subject_slide"+slideIndex)
 			throw error
 		}
 	} catch (err) {
@@ -113,6 +120,8 @@ function nextSubject() {
 	slideIndex=0;
 	if(s>jpgs.length-1) s=0;
 	$( '#'+subject_selector ).val(Number(s));
+	loadCurrentSubject();
+
 	showImage(0)
 }
 
@@ -123,6 +132,7 @@ function prevSubject() {
 	slideIndex=0;
 	if(s<0) s=jpgs.length-1;
 	$( '#'+subject_selector ).val(Number(s));
+	loadCurrentSubject();
 	showImage(0)
 }
 
@@ -133,6 +143,7 @@ function changeSubject() {
 	slideIndex=0;
 	if(s>jpgs.length-1) s=0;
 	$( '#'+subject_selector ).val(Number(s));
+	loadCurrentSubject();
 	showImage(0)
 }
 
@@ -182,6 +193,29 @@ function deleteSubject() {
 	config.deleted.push(jpgs[$('#'+subject_selector).val()].subject)
 }
 
+//Load the ith subject into container c
+function loadSubject(i,c) {
+	console.log("loading subject i="+i+" which is "+jpgs[i].subject+" into c=#"+c)
+
+	$("#"+c).hide();
+	$( "#"+c ).empty();
+	for(var j=0; j<jpgs[i].entries.length; j++) {
+		var content_to_add_to_dom="<div class=\"mySlides fade\" id=\"subject_slide"+j+"\" >"+
+			"<div class=\"numbertext\">"+(j+1)+" / "+(jpgs[i].entries.length+1)+" "+jpgs[i].entries[j]+"</div>" +
+			 "<img src=\""+config.prefix+"/"+jpgs[i].entries[j]+"\" class=\"dimcontrol\" onclick=\"goForwards(true)\" ondblclick=\"nextSubject()\">" +
+			 "</div>";
+		 //console.log("adding to dom: "+content_to_add_to_dom);      
+		$( "#"+c ).append( content_to_add_to_dom );
+		//slidecount++;
+	}
+	$("#"+c).show();
+
+}
+
+function loadCurrentSubject() { loadSubject($('#'+subject_selector).val(),'slideshow-container') }
+
+
+
 async function startSlideShow() {
     //load /config into memory
 	config=await ajaxGet("config/");
@@ -194,22 +228,16 @@ async function startSlideShow() {
 	slideIndex=0;
 
 	var select = document.getElementById(subject_selector);
-	for(var i=0; i<jpgs.length; i++) {   
+	var i=0;
+	for( ; i<jpgs.length; i++) {   
 		var opt = document.createElement('option');
     	opt.value = i;
     	opt.innerHTML = jpgs[i].subject;
     	select.appendChild(opt);
 		console.log("item (subject):"+jpgs[i].subject)
-		for(var j=0; j<jpgs[i].entries.length; j++) {
-			var content_to_add_to_dom="<div class=\"mySlides fade\" id=\"subject"+i+"_slide"+j+"\" >"+
-				"<div class=\"numbertext\">"+(j+1)+" / "+(jpgs[i].entries.length+1)+" "+jpgs[i].entries[j]+"</div>" +
-         		"<img src=\""+config.prefix+"/"+jpgs[i].entries[j]+"\" class=\"dimcontrol\" onclick=\"goForwards(true)\" ondblclick=\"nextSubject()\">" +
-         		"</div>";
-         	//console.log("adding to dom: "+content_to_add_to_dom);      
-			$( ".slideshow-container" ).append( content_to_add_to_dom );
-			slidecount++;
-		}
+		
 	}
+    
 	$('#'+subject_selector).val(0)
 	
 	if(config.defaultSubject!=undefined) {
@@ -225,6 +253,10 @@ async function startSlideShow() {
 			}
 		}
 	}
+
+	loadCurrentSubject();
+	//loadSubject($('#'+subject_selector).val(),'slideshow-container')
+
 
 	console.log("show first image, selector="+$('#'+subject_selector).val())
 	console.log("\tdefault subject is "+config.defaultSubject)
