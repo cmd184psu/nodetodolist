@@ -223,7 +223,7 @@ function getAllItems(req,res) {
 	subjects.slice(start_subject,end_subject).forEach(subject => { 
 		const stats=fs.statSync(rootdir+'/'+subject);
 		const stats2=fs.existsSync(rootdir+'/_'+subject)
-		if(!rejects.has(subject) && !subject.startsWith("_") && stats.isDirectory() && !stats2) {
+		if(!rejects.has(subject) && !subject.startsWith("_") && !subject.startsWith(".git") && stats.isDirectory() && !stats2) {
 			var item=new Object;
 			item.subject=subject;
 			item.timestamp=stats.mtime.getTime();
