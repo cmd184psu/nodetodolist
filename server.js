@@ -210,16 +210,17 @@ function getAllItems(req,res) {
 
 	var allowedAge=process.env.AGE || 30; // default is to disallow pics older than 30 days
 	var unrestrictedAge=process.env.UNRESTRICTED;
-	var lenrestricted=process.env.DIRLISTRESTRICTEDLEN;
+	var start_subject=process.env.START_SUBJECT;
+	var end_subject=process.env.END_SUBJECT;
+        var image_restricted_len=process.env.ITEMS_RESTRICTEDLEN;
 
+        if(start_subject==undefined) start_subject=0;
+	if(end_subject==undefined) end_subject=subjects.length;
 
-	if(lenrestricted==undefined) lenrestricted=subjects.length;
-
-	console.log("lenrestricted = "+lenrestricted)
 
 	//lenrestricted=15;
 	//unrestrictedAge=true;
-	subjects.slice(0,lenrestricted).forEach(subject => { 
+	subjects.slice(start_subject,end_subject).forEach(subject => { 
 		const stats=fs.statSync(rootdir+'/'+subject);
 		const stats2=fs.existsSync(rootdir+'/_'+subject)
 		if(!rejects.has(subject) && !subject.startsWith("_") && stats.isDirectory() && !stats2) {
@@ -247,19 +248,25 @@ function getAllItems(req,res) {
 		}
 	})
 	var configchange=false;
+	var items_pushed=0;
 	for(var i=0; i<dirlist.length; i++) {
+		if(image_restricted_len==undefined || image_restricted_len>items_pushed) {
 		dirlist[i].entries=glob.sync(rootdir+'/'+dirlist[i].subject+'/*.'+ext).map(f => f.substr(rootdir.length+1))
+		items_pushed+=dirlist[i].entries.length;
 		if(dirlist[i].entries.length==0) {
 			dirlist[i].entries.push("no-elements")
 			if(config.deleted==undefined) config.deleted=[]
 			config.deleted.push(dirlist[i].entries.subject)
 			configchange=true
 		}
+		}
 	}
 	prettyPrint(req,res,dirlist)
 	if(configchange) {
 		console.log("need to save changes")
 	} 
+
+	console.log("number of entries pushed (total):" + items_pushed);
 	res.end();
 }
 
