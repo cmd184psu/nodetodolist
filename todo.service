@@ -1,15 +1,16 @@
 [Unit]
-Description=nodetodolist.js - todolist
-Documentation=https://example.com
+Description=Node Todolist
 After=network.target
 
 [Service]
-Environment=PORT=8000
-Type=simple
+#ExecStart=/opt/node/todolist/start.sh
+Environment=NODE_PATH=/usr/local/lib/nodejs/node-latest/lib/node_modules
+ExecStart=npm start
+WorkingDirectory=/opt/node/todolist
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
 User=cdelezenski
-ExecStart=/usr/bin/node /opt/node/nodetodolist/server.js
-Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-
