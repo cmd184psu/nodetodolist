@@ -11,7 +11,7 @@ const DEBUG=true
 
 const skipsave=false
 const restrictedsave=false
-
+const showsavealert=false
 //const BASE='lists/'
 
 function SaveList(content,filename) {
@@ -49,12 +49,12 @@ function SaveList(content,filename) {
         success: function (data) {
            $('#saveButton').prop('disabled', false);
            console.log("success in saving content for filename: "+this.url)
-           alert(data.msg)
+           if(showsavealert) alert(data.msg)
        },
        data: JSON.stringify(content), // content to send; has to be stringified, even though it's application/json
        error: function(err){   //something bad happened and ajax is unhappy
             console.log(JSON.stringify(err,null,3));
-            alert(err.responseJSON.error);
+            if(showsavealert) alert(err.responseJSON.error);
        }
 
    }).done(function(data) {
@@ -107,11 +107,7 @@ async function SelectNewFile(nf) {
                     //this.subjectListIndex=i
                     console.log("found and selected new subject ("+newsubject+")")
 
-
-
                     rebuildListSelector(subject_list_selector,lists,newsubject)
-
- 
 
                     continue;
                 }
@@ -223,4 +219,36 @@ async function startTodo() {
 
 	//render it
 	render();
+}
+
+function addIt() {
+    console.log("add new item");
+    var object={};
+
+    object.name=$("#itemName").val();
+    object.votes=0;
+    object.skip=false;
+    if($("#itemJSON").val()!="") object.json=$("#itemJSON").val();
+
+	if($("#itemPeriod").val()!="") {
+		object.periodic=true;
+		object.period=Number($("#itemPeriod").val());
+		var now=new Date();
+		var dtom=DaysToMS(object.period)
+		console.log("days="+object.period);
+		console.log("ms="+dtom);
+		console.log("ms(now)="+now.getTime());
+		var dueDate=new Date(now.getTime()+dtom);
+		object.nextDue=dueDate.getTime();
+		
+		console.log("next due is "+object.nextDue);
+		console.log("\tas date: "+EpocMStoISODate(object.nextDue));
+	}
+    arrayOfContent.push(object);
+
+    $("#itemName").val("");
+    $("#itemJSON").val("");
+    $("#itemPeriod").val("");
+    render();
+    saveit();
 }

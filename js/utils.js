@@ -73,16 +73,25 @@ function TotalVotes(list) {
 function skipit(i) {
     arrayOfContent[i].skip=true;
     render();
+    saveit();
 }
 
 function dontskipit(i) {
     arrayOfContent[i].skip=false;
     render();
+    saveit();
 }
 
 function deleteit(i) {
     arrayOfContent.splice(i,1);  
     render();
+    saveit();
+}
+
+function onHoldFlip(i) {
+    arrayOfContent[i].onHold=!arrayOfContent[i].onHold;
+    render();
+    saveit();
 }
 
 function DaysToMS(days) {
@@ -117,36 +126,7 @@ function resetDueDate(i) {
     render();
 }
 
-function addIt() {
-    console.log("add new item");
-    var object={};
 
-    object.name=$("#itemName").val();
-    object.votes=0;
-    object.skip=false;
-    if($("#itemJSON").val()!="") object.json=$("#itemJSON").val();
-
-	if($("#itemPeriod").val()!="") {
-		object.periodic=true;
-		object.period=Number($("#itemPeriod").val());
-		var now=new Date();
-		var dtom=DaysToMS(object.period)
-		console.log("days="+object.period);
-		console.log("ms="+dtom);
-		console.log("ms(now)="+now.getTime());
-		var dueDate=new Date(now.getTime()+dtom);
-		object.nextDue=dueDate.getTime();
-		
-		console.log("next due is "+object.nextDue);
-		console.log("\tas date: "+EpocMStoISODate(object.nextDue));
-	}
-    arrayOfContent.push(object);
-
-    $("#itemName").val("");
-    $("#itemJSON").val("");
-    $("#itemPeriod").val("");
-    render();
-}
 
 function moveUp(i) {
     if(i==0) {
@@ -196,9 +176,17 @@ function renderRow(i) {
 
     
 
-    var updown="<table><tr>";
+    var updown="<table>";
+    
+    //if(arrayOfContent[i].onHold) updown+="<tr bgcolor=pink>";
+    //else 
+    updown+="<tr>";
+
+    if(arrayOfContent[i].onHold) trbit="<tr bgcolor=pink>";
+    else trbit="<tr>";
     updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
     updown+="<td><span onclick=\"moveDown("+i+")\"><i class=\"fas fa-angle-double-down\"></i></span></td>";
+    updown+="<td><span onclick=\"onHoldFlip("+i+")\"><i class=\"fas fa-hand-paper\"></i></td>";
     updown+="<td><span onclick=\"deleteit("+i+")\"><i class=\"fa fa-trash\"></i></td>";
     updown+="<td>"+trophy+"</td>";
     updown+="</tr></table>";
@@ -264,12 +252,13 @@ function renderRow(i) {
     row+="<td><table><tr><td width=60px>"+coolDown+"&nbsp;</td><td><span onclick=\"resetCoolDown("+i+")\"><i class=\"fas fa-sync\"></i></span></td></tr></table></td>";
 
     
-    return "<tr>"+row+"</tr>";
+    //return "<tr>"+row+"</tr>";
+    return trbit+row+"</tr>";
 }
 
 function eligibleToVote(item) {
     var d=new Date();
-    if(item.skip) return false;
+    if(item.skip || item.onHold) return false;
     if(item.expires!=undefined && item.expires-d.getTime()>0) return false;
     return true;
 }
