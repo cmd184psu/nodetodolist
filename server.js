@@ -280,8 +280,16 @@ app.get('/items/:subject/:item',function(req,res) {
 	}
 	//console.log("requested item: "+process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item)
 
+    console.log("===> ext = "+process.env.EXT)
 
-	sendFileContent(res, process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item, 'application/json');
+
+	var contentType='application/json';
+	if(process.env.EXT==".json") contentType='application/json';
+	else if(process.env.EXT==".png") contentType='image/png';
+	else if(process.env.EXT==".md") contentType='text/plain';
+
+
+	sendFileContent(res, process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item, contentType);
 	//res.end();
 });
 
