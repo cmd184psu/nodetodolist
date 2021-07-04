@@ -425,3 +425,9 @@ function rebuildListSelector(s,l,desired) {
     $('#'+s).val(retIndex);
     return retIndex;
 }
+
+
+$.fn.checkUtils = function() {
+    console.log("get here")
+    return this.append('<p>utils is Go!</p>');
+};

@@ -2,18 +2,16 @@ PWD=$(shell pwd)
 VER=1.0.0
 NAME=NodeJS-Todolist
 PNAME=$(NAME)-$(VER)
-RPMTOP=~/rpmbuild
-SPEC=nodetodolist
 BASE=/opt/NodeJS-Todolist
 SERVICENAME=todo
 
-prep:
-	mkdir -p $(RPMTOP)/SOURCES
-	mkdir -p $(RPMTOP)/RPMS/noarch
-	mkdir -p $(RPMTOP)/SRPMS
-clean: 
-	rm -rf $(PNAME) $(PNAME)*rpm 
 
+all:
+	node /opt/node/compiler/r.js -o config.js
+
+
+clean: 
+	rm -rf www-build
 
 diff: 
 	git diff -b > diffs.txt
@@ -80,7 +78,7 @@ install-service:
 	sudo systemctl enable $(SERVICENAME)
 	sudo systemctl start $(SERVICENAME)
 
-build:
+docker-build:
 
 	docker build -t cdelezenski/myapp .
 
