@@ -195,13 +195,14 @@ function deleteSubject() {
 
 //Load the ith subject into container c
 function loadSubject(i,c) {
-	console.log("loading subject i="+i+" which is "+jpgs[i].subject+" into c=#"+c)
+	console.log("loading subject i="+i+" which is ")
+console.log(jpgs[i].subject+" into c=#"+c)
 
 	$("#"+c).hide();
 	$( "#"+c ).empty();
 	for(var j=0; j<jpgs[i].entries.length; j++) {
-		var content_to_add_to_dom="<div class=\"mySlides fade\" id=\"subject_slide"+j+"\" >"+
-			"<div class=\"numbertext\">"+(j+1)+" / "+(jpgs[i].entries.length+1)+" "+jpgs[i].entries[j]+"</div>" +
+		var content_to_add_to_dom="<div class=\"mySlides fade\" id=\"subject_slide"+j+"\" style=\"display:none\">"+
+			"<div class=\"numbertext\">"+(j+1)+" / "+(jpgs[i].entries.length)+" "+jpgs[i].entries[j]+"</div>" +
 			 "<img src=\""+config.prefix+"/"+jpgs[i].entries[j]+"\" class=\"dimcontrol\" onclick=\"goForwards(true)\" ondblclick=\"nextSubject()\">" +
 			 "</div>";
 		 //console.log("adding to dom: "+content_to_add_to_dom);      
@@ -262,3 +263,13 @@ async function startSlideShow() {
 	console.log("\tdefault subject is "+config.defaultSubject)
 	showImage(0)
 }
+
+
+define(["jquery", "utils"], function($) {
+    //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
+    $(function() {
+        startSlideShow()
+    });
+});
+
+
