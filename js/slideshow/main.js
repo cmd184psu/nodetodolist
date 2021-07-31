@@ -210,6 +210,7 @@ console.log(jpgs[i].subject+" into c=#"+c)
 		//slidecount++;
 	}
 	$("#"+c).show();
+	fixRes();
 
 }
 
