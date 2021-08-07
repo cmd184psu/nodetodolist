@@ -1,0 +1,28 @@
+[
+  {
+    "label": "menu 1",
+    "elements" : [
+      {
+        "title" : "Wells Fargo",
+        "json"  : "wells.json"
+      },
+      {
+        "title" : "Comcast",
+        "json"  : "comcast.json"
+      }
+    ]
+  },
+  {
+    "label": "menu 2",
+    "elements" : [
+      {
+        "title" : "Wells Fargo22",
+        "json"  : "wells22.json"
+      },
+      {
+        "title" : "Comcast22",
+        "json"  : "comcast22.json"
+      }
+    ]
+  }
+]

@@ -1,0 +1,14 @@
+PORT=8000
+INDEX=/todo.html
+PREFIX=lists
+EXT=json
+TODO=true
+#DEFAULTSUBJECT=home
+#DEFAULTSUBJECT=work
+#not implemented yet
+#RESTRICTSUBJECT=work
+#DEFAULTITEM=home/index.json #test without subject
+# saving is not enabled yet
+AUTOSAVE=false
+# prevent web server from serving individual items
+STRICT=true
