@@ -10,69 +10,128 @@
 	<link rel="stylesheet" href="css/modal.css" />
 	<link rel="stylesheet" href="css/fontawsme.css" />
 	<link rel='stylesheet' href='css/fontawall.css' />
-	<link rel='stylesheet' href='css/bootstrap.min.css' />
+
+
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+
 	<link rel="shortcut icon" href="images/fvw.png" type="image/x-icon" />
 
-	<script data-main="js/jsdb" src="js/lib/require.js"></script>
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery-ui.js"></script>
+	<script src="js/popper.js"></script>
+	<script src="js/bootstrap.js"></script>
 
-	<style>
-		body {
-		  position: relative; 
-		}
+
+	<script src="js/utils.js"></script>
+	<script src="js/menuserver.js"></script>
+
+
+	<script>
+		$( document ).ready(function() {
+    		startMenuserver()
+		}); //end doc ready function
+	</script>
+<style>
+	body {
+	  position: relative; 
+	}
 	</style>
-
 </head>
 
-<body data-spy="scroll" data-target=".navbar" data-offset="50">
+<body>
+	<strong>Vote!</strong>
+	<div id="titleDiv" style="display:none">Title: not implemented</div>
+	<div id="loadedSubject">Subject: <select id="subject-list-selector" onchange="changeSubject()"></select></div>
+	<div id="loadedList">List: <select id="item-list-selector" onchange="changeItem()"></select></div>
+	<div><button id="backBTN" onclick="revertList()">Go Back</button></div>
+	<!-- Total Vote Count: <input type=text id="voteCount" value="100" /><BR>-->
+	<table id="thetable" border=1>
+	</table>
+	
+	</div>
+
 
 	<nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">  
-	  <ul class="navbar-nav" id="ul_nav_list">
-		<li class="nav-item">
-		  <a class="nav-link" href="#section1">Section 1</a>
-		</li>
-		<li class="nav-item">
-		  <a class="nav-link" href="#section2">Section 2</a>
-		</li>
-		<li class="nav-item">
-		  <a class="nav-link" href="#section3">Section 3</a>
-		</li>
-		<li class="nav-item dropdown">
-		  <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
-			Section 4
-		  </a>
-		  <div class="dropdown-menu">
-			<a class="dropdown-item" href="#section41">Link 1</a>
-			<a class="dropdown-item" href="#section42">Link 2</a>
-		  </div>
-		</li>
-	  </ul>
-	</nav>
+		<table>
+			<tr><td>
+		
+		<ul class="navbar-nav" id="navbar1">
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="navbardrop_utilities" data-toggle="dropdown">
+					Utilitles
+				  </a>
+				  <div class="dropdown-menu">
+					<a class="dropdown-item" href="#wellsfargoID">Wells Fargo</a>
+				  </div>
+			</li>
+			<li class="nav-item dropdown" style="display:none">
+				<a class="nav-link dropdown-toggle" href="#" id="navbardrop_finance" data-toggle="dropdown">
+					Finance
+				  </a>
+				  <div class="dropdown-menu">
+					<a class="dropdown-item" href="#wellsfargoID">Wells Fargo</a>
+				  </div>
+			</li>
+		</ul>
+	</td></tr>
+
+	<tr>
+		<td>
+		<ul class="navbar-nav" id="navbar2">
+			<li class="nav-item dropdown" style="display:none">
+				<a class="nav-link dropdown-toggle" href="#" id="navbardrop_utilities" data-toggle="dropdown">
+					Utilitles
+				  </a>
+				  <div class="dropdown-menu">
+					<a class="dropdown-item" href="#wellsfargoID">Wells Fargo</a>
+				  </div>
+			</li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="navbardrop_finance" data-toggle="dropdown">
+					Finance
+				  </a>
+				  <div class="dropdown-menu">
+					<a class="dropdown-item" href="#wellsfargoID">Wells Fargo</a>
+				  </div>
+			</li>
+		</ul>
+
+		</td>
+	</tr>
+    </table>
+	</nav>	
 	
-	<div id="section1" class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
-	  <h1>Section 1</h1>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	</div>
-	<div id="section2" class="container-fluid bg-warning" style="padding-top:70px;padding-bottom:70px">
-	  <h1>Section 2</h1>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	</div>
-	<div id="section3" class="container-fluid bg-secondary" style="padding-top:70px;padding-bottom:70px">
-	  <h1>Section 3</h1>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	</div>
-	<div id="section41" class="container-fluid bg-danger" style="padding-top:70px;padding-bottom:70px">
-	  <h1>Section 4 Submenu 1</h1>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	</div>
-	<div id="section42" class="container-fluid bg-info" style="padding-top:70px;padding-bottom:70px">
-	  <h1>Section 4 Submenu 2</h1>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	  <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and look at the navigation bar while scrolling!</p>
-	</div>
 	
-	</body>
+	  
+	  <div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
+		<h1>Wells Fargo</h1>
+		<p>URL, Un, pw.. etc</p>
+	</div>
+	<div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
+		<h1>Wells Fargo</h1>
+		<p>URL, Un, pw.. etc</p>
+	</div>
+	<div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
+		<h1>Wells Fargo</h1>
+		<p>URL, Un, pw.. etc</p>
+	</div>
+	<div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
+		<h1>Wells Fargo</h1>
+		<p>URL, Un, pw.. etc</p>
+	</div>
+	<div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
+		<h1>Wells Fargo</h1>
+		<p>URL, Un, pw.. etc</p>
+	</div>
+	<div  class="container-fluid" style="padding-top:70px;padding-bottom:70px">
+		<h1>Wells Fargo</h1>
+		<p>URL, Un, pw.. etc</p>
+	</div>
+    <div id="lower">
+		<div id="wellsfargoID" class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
+			<h1>Wells Fargo</h1>
+			<p>URL, Un, pw.. etc</p>
+		</div>
+	  </div>
+</body>
 </html>

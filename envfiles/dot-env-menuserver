@@ -1,6 +1,6 @@
 PORT=9999
-INDEX=/jsdb.html
-PREFIX=lists
+INDEX=/menuserver.html
+PREFIX=menus
 EXT=json
 TODO=true
 #DEFAULTSUBJECT=home
@@ -11,4 +11,4 @@ TODO=true
 # saving is not enabled yet
 AUTOSAVE=false
 # prevent web server from serving individual items
-STRICT=true
+#STRICT=true

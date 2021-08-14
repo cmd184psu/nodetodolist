@@ -364,7 +364,13 @@ function vote() {
 
 //render currently loaded content
 //also demonstrates how to use QUIET_LOCAL vs DEBUG_UTILS correctly
+
 function render() {
+
+    console.log("render")
+}
+
+function renderDONTUSE() {
     var QUIET_LOCAL=!DEBUG_UTILS && true
 
     //console.log("---> render()::QUIET_LOCAL="+QUIET_LOCAL)
@@ -395,6 +401,8 @@ function render() {
     }
 
     content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td colspan=3>=====</td></tr>";
+    
+    //temporarily, don't draw the table
     document.getElementById("thetable").innerHTML=content;
     // for cooldown
     var now=new Date();
@@ -438,3 +446,21 @@ $.fn.checkUtils = function() {
     console.log("get here")
     return this.append('<p>utils is Go!</p>');
 };
+
+
+function titleCase(str) {
+    let upper = true
+    let newStr = ""
+    for (let i = 0, l = str.length; i < l; i++) {
+        // Note that you can also check for all kinds of spaces  with
+        // str[i].match(/\s/)
+        if (str[i] == " ") {
+            upper = true
+            newStr += str[i]
+            continue
+        }
+        newStr += upper ? str[i].toUpperCase() : str[i].toLowerCase()
+        upper = false
+    }
+    return newStr
+}

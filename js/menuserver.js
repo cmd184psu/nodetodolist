@@ -1,6 +1,6 @@
 var config=new Object;
 var arrayOfContent=[];
-var lists=[]
+var topMenus=[]
 
 const item_list_selector='item-list-selector'
 const subject_list_selector='subject-list-selector'
@@ -250,7 +250,7 @@ function addMajorMenu(el,menuJSON) {
 
 
 
-async function startJSDB() {
+async function startMenuserverDONTUSE() {
     //load /config into memory
 	config=await ajaxGetJSON("config/");
 
@@ -266,10 +266,61 @@ async function startJSDB() {
     //}
 }
 
-//define(["jquery", "utils", "popper", "bootstrap"], function($) {
-define(["jquery", "utils" ], function($) {
-        //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
-    $(function() {
-        startJSDB()
-    });
-});
+async function startMenuserver() {
+    //load /config into memory
+	config=await ajaxGetJSON("config/");
+
+	//load items into memory
+	topMenus=await ajaxGetJSON("items");
+
+	//render selectors
+    //DEBUG && console.log("config.defaultSubject="+config.defaultSubject)
+    //rebuildListSelector(subject_list_selector,lists,config.defaultSubject)
+    
+    //DEBUG && console.log("config.defaultItem="+config.defaultItem)
+	//rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,config.defaultItem)
+
+   //build out the menu
+
+     for(var i=0; i<topMenus.length; i++) {
+        //console.log(JSON.stringify(topMenus[i],null,3));
+
+        console.log("subject==="+topMenus[i].subject)
+        topMenus[i].subject=titleCase(topMenus[i].subject)
+        topMenus[i].submenus=[];
+        if(topMenus[i].entries!=undefined) {
+            for(var j=0; j<topMenus[i].entries.length; j++) {
+
+               console.log("\tj="+j+" load and add as submenu: "+JSON.stringify(topMenus[i].entries[j],null,3));
+
+               //content=await ajaxGetJSON(topMenus[i].entries[j])
+               submenu_index=topMenus[i].submenus.length;
+               topMenus[i].submenus.push(await ajaxGetJSON("menus/"+topMenus[i].entries[j]))
+               topMenus[i].submenus[submenu_index].title=titleCase(topMenus[i].submenus[submenu_index].title)
+               console.log("\tj="+j+" content="+JSON.stringify(topMenus[i].submenus[submenu_index]))
+
+            }
+        } else {
+            console.log("---- entries is null for j="+j+"---");
+        }
+
+
+
+        console.log("--- NEXT ---")
+     }
+     console.log("entire menu heiarchy: ")
+     
+
+    console.log(JSON.stringify(topMenus,null,3))
+
+    //load default topic and json
+ //   currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()] 
+ //   previousFilename=undefined // on purpose, also disable back button
+ //   $("#backBTN").prop("disabled",true);
+ //   DEBUG && console.log("loading: "+currentFilename)
+ //   arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
+
+	//render it
+	render();
+}
+
