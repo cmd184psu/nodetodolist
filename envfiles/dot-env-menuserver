@@ -1,5 +1,5 @@
-PORT=8000
-INDEX=/todo.html
+PORT=9999
+INDEX=/jsdb.html
 PREFIX=lists
 EXT=json
 TODO=true

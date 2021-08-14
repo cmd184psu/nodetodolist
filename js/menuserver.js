@@ -198,30 +198,6 @@ function revertList() {
 }
 
 
-async function startTodo() {
-    //load /config into memory
-	config=await ajaxGetJSON("config/");
-
-	//load items into memory
-	lists=await ajaxGetJSON("items");
-
-	//render selectors
-    DEBUG && console.log("config.defaultSubject="+config.defaultSubject)
-    rebuildListSelector(subject_list_selector,lists,config.defaultSubject)
-    
-    DEBUG && console.log("config.defaultItem="+config.defaultItem)
-	rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,config.defaultItem)
-
-    //load default topic and json
-    currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()] 
-    previousFilename=undefined // on purpose, also disable back button
-    $("#backBTN").prop("disabled",true);
-    DEBUG && console.log("loading: "+currentFilename)
-    arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
-
-	//render it
-	render();
-}
 
 function addIt() {
     console.log("add new item");
@@ -253,19 +229,47 @@ function addIt() {
     $("#itemPeriod").val("");
     render();
     saveit();
-    $("#addDiv").hide()
 }
 
-function showAdd() {
+function addMajorMenu(el,menuJSON) {
+    
+   var content='<li class="nav-item dropdown">'
 
-    $("#addDiv").toggle()
-
+   content+='<a class="nav-link dropdown-toggle" href="#" id="navbardrop2" data-toggle="dropdown">'
+   content+='Section 422'
+   content+='</a>'
+   content+='<div class="dropdown-menu">'
+   content+='<a class="dropdown-item" href="#section41">SLink 1</a>'
+   content+='<a class="dropdown-item" href="#section42">SLink 2</a>'
+   content+='</div>'
+   content+='</li>'
+   
+    $(el).append(content);
 }
 
 
-define(["jquery", "utils"], function($) {
-    //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
+
+
+async function startJSDB() {
+    //load /config into memory
+	config=await ajaxGetJSON("config/");
+
+	//load items into memory
+	menus=await ajaxGetJSON("data.json");
+
+
+    console.log(JSON.stringify(menus,null,3))
+
+    //for(var i=0; i<menus.length; i++) {
+        var i=0;
+       addMajorMenu("#ul_nav_list",menus[i])
+    //}
+}
+
+//define(["jquery", "utils", "popper", "bootstrap"], function($) {
+define(["jquery", "utils" ], function($) {
+        //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
     $(function() {
-        startTodo()
+        startJSDB()
     });
 });
