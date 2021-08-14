@@ -27,9 +27,11 @@
 	<button onclick="vote()">Vote</button>
 	<button onclick="render()">Refresh Page</button>
 	<button id="saveButton" onclick="saveit()">Save</button>
+	<button id="addButton" onClick="showAdd()"><i class="fas fa-plus"></i></button>
 	<BR />
 	<HR>
 	<BR />
+	<div id="addDiv" style="display:none">
 	<table border=1>
 		<tr>
 			<td>Item: </td><td><input id="itemName" type="text" size="30" /></td>
@@ -47,5 +49,6 @@
 			
 		</tr>
 	</table>
+	</div>
 </body>
 </html>

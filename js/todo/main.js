@@ -253,6 +253,13 @@ function addIt() {
     $("#itemPeriod").val("");
     render();
     saveit();
+    $("#addDiv").hide()
+}
+
+function showAdd() {
+
+    $("#addDiv").toggle()
+
 }
 
 

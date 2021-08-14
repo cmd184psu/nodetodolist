@@ -93,6 +93,11 @@ function onHoldFlip(i) {
     render();
     saveit();
 }
+function inProgressFlip(i) {
+    arrayOfContent[i].inProgress=!arrayOfContent[i].inProgress;
+    render();
+    saveit();
+}
 
 function DaysToMS(days) {
 	//return days*24*60*60*1000;
@@ -183,10 +188,12 @@ function renderRow(i) {
     updown+="<tr>";
 
     if(arrayOfContent[i].onHold) trbit="<tr bgcolor=pink>";
+    else  if(arrayOfContent[i].inProgress) trbit="<tr bgcolor=lightgreen>";
     else trbit="<tr>";
     updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
     updown+="<td><span onclick=\"moveDown("+i+")\"><i class=\"fas fa-angle-double-down\"></i></span></td>";
     updown+="<td><span onclick=\"onHoldFlip("+i+")\"><i class=\"fas fa-hand-paper\"></i></td>";
+    updown+="<td><span onclick=\"inProgressFlip("+i+")\"<i class=\"fas fa-play\"></i></td>";
     updown+="<td><span onclick=\"deleteit("+i+")\"><i class=\"fa fa-trash\"></i></td>";
     updown+="<td>"+trophy+"</td>";
     updown+="</tr></table>";
