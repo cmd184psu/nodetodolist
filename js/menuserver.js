@@ -14,6 +14,8 @@ const restrictedsave=false
 const showsavealert=false
 //const BASE='lists/'
 
+var SHOWALLPAGES=true;
+
 function SaveList(content,filename) {
     if(filename==undefined) {
         throw error
@@ -74,56 +76,39 @@ async function SelectNewFile(nf) {
     if(nf==undefined) {
         throw error
     }    
-    
+
     console.log("====SelectNewFile("+nf+")")
-    
-    
     var p=currentFilename;
     console.log("\tcurrent file is "+currentFilename)
     console.log("\tselected file is "+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()])
-
-
     var newsubject=nf.includes('/') && nf.split('/')[0] || lists[$('#'+subject_list_selector).val()].subject
     console.log("\twith new subject: "+newsubject)
-
     if(!nf.includes('/')) nf=newsubject+'/'+nf
-
-
     console.log("\tdesired file is "+nf)
 
-
-
-
     if(nf!=undefined) {
-        
-        
         //if current subject and desired subject (within new filename nf, then select it)
         if(lists[$('#'+subject_list_selector).val()].subject!=newsubject) {
             //console.log("need new subject: "+newsubject)
-
             for(var i=0; i<lists.length; i++) {
                 if(lists[i].subject==newsubject) {
                     $('#'+subject_list_selector).val(i)
                     //this.subjectListIndex=i
                     console.log("found and selected new subject ("+newsubject+")")
-
                     rebuildListSelector(subject_list_selector,lists,newsubject)
-
                     continue;
                 }
             }
         } else {
-
             console.log("sticking with same subject ("+newsubject+")")
         }
     }
 
-       //either the subject didn't change or it did; our lists should be correct now
-       console.log("current subject index = "+$('#'+subject_list_selector).val());
-       console.log("current list index = "+rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,nf))
+    //either the subject didn't change or it did; our lists should be correct now
+    console.log("current subject index = "+$('#'+subject_list_selector).val());
+    console.log("current list index = "+rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,nf))
    
     if(currentFilename!=undefined && config.autosave) SaveList(arrayOfContent,currentFilename);
- 
 
     arrayOfContent=await ajaxGetJSON('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
     currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()];
@@ -142,13 +127,11 @@ function changeItem() {
     SelectNewFile(lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
 }
 
-
 function changeSubject() {
     SelectNewSubject(lists[$('#'+subject_list_selector).val()].subject,lists[$('#'+subject_list_selector).val()].subject+"/index."+config.ext)
 }
 
 function SelectNewSubject(newsubject,newfile) {
-    
     if(newsubject==undefined && newfile==undefined) {
         console.log("neither subject nor file is defined; checking defaults")
         newfile=config.defaultItem || (config.defaultSubject+"/index."+config.ext);
@@ -180,24 +163,18 @@ function SelectNewSubject(newsubject,newfile) {
     // console.log("\tcalling rebuildListSelector with tj="+tj)
 
     rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,newfile)
-
-
     //newFilename=lists[$('#subject-list-selector').val()].entries[$('#list-selector').val()]
     //changeItem();
     SelectNewFile(lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
-
 }
 
 function revertList() {
     if(previousFilename!=undefined) {
         console.log("calling SelectNewFile("+previousFilename+")")
-
         SelectNewFile(previousFilename);
     }
     $("#backBTN").prop("disabled",true);
 }
-
-
 
 function addIt() {
     console.log("add new item");
@@ -207,7 +184,6 @@ function addIt() {
     object.votes=0;
     object.skip=false;
     if($("#itemJSON").val()!="") object.json=$("#itemJSON").val();
-
 	if($("#itemPeriod").val()!="") {
 		object.periodic=true;
 		object.period=Number($("#itemPeriod").val());
@@ -218,7 +194,6 @@ function addIt() {
 		console.log("ms(now)="+now.getTime());
 		var dueDate=new Date(now.getTime()+dtom);
 		object.nextDue=dueDate.getTime();
-		
 		console.log("next due is "+object.nextDue);
 		console.log("\tas date: "+EpocMStoISODate(object.nextDue));
 	}
@@ -231,10 +206,8 @@ function addIt() {
     saveit();
 }
 
-function addMajorMenu(el,menuJSON) {
-    
+function addMajorMenuDONTUSE(el,menuJSON) {
    var content='<li class="nav-item dropdown">'
-
    content+='<a class="nav-link dropdown-toggle" href="#" id="navbardrop2" data-toggle="dropdown">'
    content+='Section 422'
    content+='</a>'
@@ -243,12 +216,8 @@ function addMajorMenu(el,menuJSON) {
    content+='<a class="dropdown-item" href="#section42">SLink 2</a>'
    content+='</div>'
    content+='</li>'
-   
-    $(el).append(content);
+   $(el).append(content);
 }
-
-
-
 
 async function startMenuserverDONTUSE() {
     //load /config into memory
@@ -257,13 +226,117 @@ async function startMenuserverDONTUSE() {
 	//load items into memory
 	menus=await ajaxGetJSON("data.json");
 
-
     console.log(JSON.stringify(menus,null,3))
 
     //for(var i=0; i<menus.length; i++) {
         var i=0;
        addMajorMenu("#ul_nav_list",menus[i])
     //}
+}
+
+//move to utils
+function dropDownButton(title) {
+    return "<button class=\"dropbtn\">"+title+"<i class=\"fa fa-caret-down\"></i></button>";
+}
+
+function arrayToDropDown(arrayContent) {
+    var content="<div class=\"dropdown-content\">";
+    for(var i=0; i<arrayContent.length; i++) {
+        console.log("arrayToDropDown::id="+arrayContent[i].id);
+        content+="<a href=\"javascript:showPage(\'"+arrayContent[i].id+"\')\">"+titleCase(arrayContent[i].title)+"</a>";
+    }
+    content+="</div>";
+    return content;
+}
+
+function addMajorMenu(el,title,submenus) {
+    var content="<div class=\"dropdown\">"+dropDownButton(title)+arrayToDropDown(submenus)+"</div>"
+    console.log(content)
+    $('#'+el).append("<div class=\"dropdown\">"+dropDownButton(title)+arrayToDropDown(submenus)+"</div>")
+}
+
+function addMajorMenuHamburger(el) {
+    $('#'+el).append("<a href=\"javascript:void(0);\" style=\"font-size:15px;\" class=\"icon\" onclick=\"openMenu()\">&#9776;</a>")
+}
+
+
+function renderSiteRow(site, i) {
+   var link="";
+   if(site.url!=undefined) link=site.url;
+   if(site.port!=undefined) link=site.url+":"+site.port
+   if(site.prefix==undefined) site.prefix=makeID(5)+"_"
+   var content="";
+   if(site.label!=undefined) label=site.label;
+   else label=link;
+
+   if(link=="" && label!="") content+="<tr><td colspan=2>"+label+"</td></tr>";
+   else if(link!="" && label!="" && link!=label) content+="<tr><td colspan=2><a href=\""+link+"\" target=\"_blank\">"+label+"</a> : "+link+"</td></tr>";
+   else if(link!="" && label!="" && link==label) content+="<tr><td colspan=2><a href=\""+link+"\" target=\"_blank\">"+label+"</a></td></tr>";
+      
+   content+=
+   "<tr><td>Username: </td><td>"+site.username+"</td></tr>"+
+   "<tr><td>Password: </td><td><div id=\""+site.prefix+"pwd"+i+"_inner\" style=\"display:none\">"+  
+   "<input type=text id=\""+site.prefix+"txt"+i+"\" value=\""+
+   site.password+"\"></div><div id=\""+site.prefix+"pwd"+i+"_hidden\" >xxxxxxxxxx</div></td></tr>"+
+   "<tr><td></td><td>"+
+   "<table><tr>"+
+   "<td><button type=\"button\" onclick=\"toggle(\'"+site.prefix+"pwd"+i+"\')\">Hide/Show</button></td>"+
+   "<td><button type=\"button\" onclick=\"copyToClipBoard(\'"+site.password+"\')\">Copy</button></td>"+
+   "</table>"+
+   "</td></tr>"
+    return content;
+}
+
+function renderSiteTable(siteArray) {
+    if(siteArray==undefined) return "";
+    var content="";
+    for(var i=0; i<siteArray.length; i++) {
+        content+=renderSiteRow(siteArray[i],i)
+    }
+    return content;
+}
+
+function addPage(el,json) {
+    var s=""
+    if(!SHOWALLPAGES) {
+        s="style=\"display:none\"";
+    }
+    
+    var content="<div id=\""+json.id+"\" class=\"pageClass\" "+s+" ><h2>"+json.title+"</h2>"; 
+    
+    if(json.url!=undefined) content+="<a href=\""+json.url+"\"  target=\"_blank\">"+json.url+"</a>";
+        
+    content+="<BR>";
+    content+="<table style=\"border-collapse: separate; border-spacing: 15px 20px;\">"
+    if(json.sites!=undefined) content+=renderSiteTable(json.sites);
+
+    if(json.notes!=undefined) {
+        content+="<tr>"+
+        "<tr><td>Notes: </td>"+
+        "<td><p>"+json.notes+"</p></td>"+
+        "</tr>";
+    }
+    if(json.gdoc!=undefined) {
+
+        content+="<tr>"+
+        "<tr><td>G-Doc: </td>"+
+        "<td><p>"+json.notes+"</p></td>"+
+        "</tr>";
+    }
+
+    content+="</table>"
+    $('#'+el).append(content+"</div><div><a href=\"#top\"><i class=\"fas fa-arrow-up\"></i></a></div><div class=\"pageClass\"><HR/><BR></div>");
+}
+
+function showPage(el) {
+    if(SHOWALLPAGES) {
+
+        window.location = "#"+el;
+    } else {    
+        $(".pageClass").hide();
+        console.log("show element: #"+el)
+        $("#"+el).show();
+    }
 }
 
 async function startMenuserver() {
@@ -280,9 +353,9 @@ async function startMenuserver() {
     //DEBUG && console.log("config.defaultItem="+config.defaultItem)
 	//rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,config.defaultItem)
 
-   //build out the menu
-
-     for(var i=0; i<topMenus.length; i++) {
+    //build out the menu
+    const renderedPageSet=new Set();
+    for(var i=0; i<topMenus.length; i++) {
         //console.log(JSON.stringify(topMenus[i],null,3));
 
         console.log("subject==="+topMenus[i].subject)
@@ -290,37 +363,27 @@ async function startMenuserver() {
         topMenus[i].submenus=[];
         if(topMenus[i].entries!=undefined) {
             for(var j=0; j<topMenus[i].entries.length; j++) {
-
                console.log("\tj="+j+" load and add as submenu: "+JSON.stringify(topMenus[i].entries[j],null,3));
-
                //content=await ajaxGetJSON(topMenus[i].entries[j])
                submenu_index=topMenus[i].submenus.length;
                topMenus[i].submenus.push(await ajaxGetJSON("menus/"+topMenus[i].entries[j]))
                topMenus[i].submenus[submenu_index].title=titleCase(topMenus[i].submenus[submenu_index].title)
                console.log("\tj="+j+" content="+JSON.stringify(topMenus[i].submenus[submenu_index]))
-
+                if(!renderedPageSet.has(topMenus[i].submenus[submenu_index].id)) {
+                   addPage("lowerSection",topMenus[i].submenus[submenu_index])
+                   renderedPageSet.add(topMenus[i].submenus[submenu_index].id)
+                }
             }
+            addMajorMenu("myTopnav",topMenus[i].subject, topMenus[i].submenus)
         } else {
             console.log("---- entries is null for j="+j+"---");
         }
-
-
-
         console.log("--- NEXT ---")
-     }
-     console.log("entire menu heiarchy: ")
-     
-
+    }
+    console.log("entire menu heiarchy: ")
     console.log(JSON.stringify(topMenus,null,3))
 
     //load default topic and json
- //   currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()] 
- //   previousFilename=undefined // on purpose, also disable back button
- //   $("#backBTN").prop("disabled",true);
- //   DEBUG && console.log("loading: "+currentFilename)
- //   arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
-
-	//render it
+    addMajorMenuHamburger("myTopnav")
 	render();
 }
-

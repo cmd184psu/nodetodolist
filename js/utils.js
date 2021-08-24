@@ -464,3 +464,55 @@ function titleCase(str) {
     }
     return newStr
 }
+
+function toggle(id) {
+	var x = document.getElementById(id+"_inner");
+	if (x.style.display === "none") {
+		x.style.display = "block";
+	} else {
+		x.style.display = "none";
+	}
+	var y = document.getElementById(id+"_hidden");
+
+	if (y.style.display === "none") {
+		y.style.display = "block";
+	} else {
+		y.style.display = "none";
+	}
+}
+
+
+function copyToClipBoard(text){
+  var c=document.getElementById('copytext');
+  c.value=text;
+  
+  var x=document.getElementById('hiddentext');
+  x.style.display="block";
+  
+      c.select();
+      try {
+    var successful = document.execCommand('copy')
+    var msg = successful ? 'successfully' : 'unsuccessfully'
+    alert('Copied!');
+      }catch(err) {
+    alert('Falied to copy.');
+      }
+      x.style.display="none";
+}
+
+function makeID(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * 
+ charactersLength));
+   }
+   return result;
+}
+
+function href(url,label) {
+   if(label==undefined) return "<href=\""+url+"\">"+url+"</a>";
+
+   return "<href=\""+url+"\" target=_>"+label+"</a>";
+}

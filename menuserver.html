@@ -6,21 +6,20 @@
 	<title>NodeJS Todolist</title>
 	<link rel="stylesheet" href="css/jquery-ui.css" />
 	<!--<link rel="stylesheet" href="css/styles.css" />-->
-	<link rel="stylesheet" href="css/nav.css" />
+	<!--<link rel="stylesheet" href="css/nav.css" />-->
 	<link rel="stylesheet" href="css/modal.css" />
 	<link rel="stylesheet" href="css/fontawsme.css" />
 	<link rel='stylesheet' href='css/fontawall.css' />
 
 
-	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<!--<link rel="stylesheet" href="css/bootstrap.min.css">-->
+    <link rel="stylesheet" href="css/responsivenav.css">
 
 	<link rel="shortcut icon" href="images/fvw.png" type="image/x-icon" />
 
 	<script src="js/jquery.js"></script>
 	<script src="js/jquery-ui.js"></script>
-	<script src="js/popper.js"></script>
-	<script src="js/bootstrap.js"></script>
-
+    <script src="js/navcontrols.js"></script>
 
 	<script src="js/utils.js"></script>
 	<script src="js/menuserver.js"></script>
@@ -39,99 +38,11 @@
 </head>
 
 <body>
-	<strong>Vote!</strong>
-	<div id="titleDiv" style="display:none">Title: not implemented</div>
-	<div id="loadedSubject">Subject: <select id="subject-list-selector" onchange="changeSubject()"></select></div>
-	<div id="loadedList">List: <select id="item-list-selector" onchange="changeItem()"></select></div>
-	<div><button id="backBTN" onclick="revertList()">Go Back</button></div>
-	<!-- Total Vote Count: <input type=text id="voteCount" value="100" /><BR>-->
-	<table id="thetable" border=1>
-	</table>
-	
+	<div class="topnav" id="myTopnav">
 	</div>
-
-
-	<nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">  
-		<table>
-			<tr><td>
-		
-		<ul class="navbar-nav" id="navbar1">
-			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="#" id="navbardrop_utilities" data-toggle="dropdown">
-					Utilitles
-				  </a>
-				  <div class="dropdown-menu">
-					<a class="dropdown-item" href="#wellsfargoID">Wells Fargo</a>
-				  </div>
-			</li>
-			<li class="nav-item dropdown" style="display:none">
-				<a class="nav-link dropdown-toggle" href="#" id="navbardrop_finance" data-toggle="dropdown">
-					Finance
-				  </a>
-				  <div class="dropdown-menu">
-					<a class="dropdown-item" href="#wellsfargoID">Wells Fargo</a>
-				  </div>
-			</li>
-		</ul>
-	</td></tr>
-
-	<tr>
-		<td>
-		<ul class="navbar-nav" id="navbar2">
-			<li class="nav-item dropdown" style="display:none">
-				<a class="nav-link dropdown-toggle" href="#" id="navbardrop_utilities" data-toggle="dropdown">
-					Utilitles
-				  </a>
-				  <div class="dropdown-menu">
-					<a class="dropdown-item" href="#wellsfargoID">Wells Fargo</a>
-				  </div>
-			</li>
-			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="#" id="navbardrop_finance" data-toggle="dropdown">
-					Finance
-				  </a>
-				  <div class="dropdown-menu">
-					<a class="dropdown-item" href="#wellsfargoID">Wells Fargo</a>
-				  </div>
-			</li>
-		</ul>
-
-		</td>
-	</tr>
-    </table>
-	</nav>	
-	
-	
 	  
-	  <div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
-		<h1>Wells Fargo</h1>
-		<p>URL, Un, pw.. etc</p>
+	<div id="lowerSection" style="padding-left:16px">
 	</div>
-	<div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
-		<h1>Wells Fargo</h1>
-		<p>URL, Un, pw.. etc</p>
-	</div>
-	<div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
-		<h1>Wells Fargo</h1>
-		<p>URL, Un, pw.. etc</p>
-	</div>
-	<div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
-		<h1>Wells Fargo</h1>
-		<p>URL, Un, pw.. etc</p>
-	</div>
-	<div  class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
-		<h1>Wells Fargo</h1>
-		<p>URL, Un, pw.. etc</p>
-	</div>
-	<div  class="container-fluid" style="padding-top:70px;padding-bottom:70px">
-		<h1>Wells Fargo</h1>
-		<p>URL, Un, pw.. etc</p>
-	</div>
-    <div id="lower">
-		<div id="wellsfargoID" class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
-			<h1>Wells Fargo</h1>
-			<p>URL, Un, pw.. etc</p>
-		</div>
-	  </div>
+	<div style="display:none" id="hiddentext"><input type="text" id="copytext" value="null"></div>
 </body>
 </html>
