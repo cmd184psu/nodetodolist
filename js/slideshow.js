@@ -265,12 +265,3 @@ async function startSlideShow() {
 	showImage(0)
 }
 
-
-define(["jquery", "utils"], function($) {
-    //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
-    $(function() {
-        startSlideShow()
-    });
-});
-
-
