@@ -52,7 +52,16 @@ app.use((req, res, next) => {
 });
 
 const BASE=process.env.BASE || '.';
-var config=JSON.parse(fs.readFileSync(BASE+'/data.json', 'utf8'));
+var config=[];
+
+try {
+	if (fs.existsSync(BASE+'/data.json')) {
+		config=JSON.parse(fs.readFileSync(BASE+'/data.json', 'utf8'));
+	}
+  } catch(err) {
+	console.error(err)
+  }
+
 
 function btoa(data) {
 	return Buffer.from(data).toString('base64');
@@ -69,11 +78,11 @@ function prettyPrint(req, res, content) {
 	}
 }
 
-var flatdb=BASE+"/data.json";
+//var flatdb=BASE+"/data.json";
 
-console.log("sending: "+flatdb);
+//console.log("sending: "+flatdb);
 app.get('/config', function(req, res) {
-	config=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
+	//config=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
 	
 	var content=new Object
 	content.defaultSubject=config.defaultSubject || process.env.DEFAULTSUBJECT || "home"
