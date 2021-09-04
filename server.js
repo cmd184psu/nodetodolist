@@ -91,6 +91,8 @@ app.get('/config', function(req, res) {
 	content.prefix=config.prefix || process.env.PREFIX || "lists" //list or nt
 	content.ext=config.ext || process.env.EXT || "json" //json or jpg
 
+    content.showAllPages=config.showAllPages
+
 	var di=config.defaultItem || process.env.DEFAULTITEM || ""
 
 	//if config and env have nothing for defaultsubject, we need to infer from defaultitem
