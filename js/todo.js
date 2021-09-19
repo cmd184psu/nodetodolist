@@ -263,9 +263,9 @@ function showAdd() {
 }
 
 
-define(["jquery", "utils"], function($) {
-    //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
-    $(function() {
-        startTodo()
-    });
-});
+// define(["jquery", "utils"], function($) {
+//     //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
+//     $(function() {
+//         startTodo()
+//     });
+// });

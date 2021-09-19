@@ -367,10 +367,6 @@ function vote() {
 
 function render() {
 
-    console.log("render")
-}
-
-function renderDONTUSE() {
     var QUIET_LOCAL=!DEBUG_UTILS && true
 
     //console.log("---> render()::QUIET_LOCAL="+QUIET_LOCAL)
