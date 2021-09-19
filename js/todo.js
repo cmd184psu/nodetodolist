@@ -198,13 +198,28 @@ function revertList() {
 }
 
 
-async function startTodo() {
+async function startTodo(params) {
     //load /config into memory
 	config=await ajaxGetJSON("config/");
 
 	//load items into memory
 	lists=await ajaxGetJSON("items");
 
+    if(params!=undefined) {
+        if(params.subject!=undefined) {
+            config.defaultSubject=params.subject
+        }
+        if(params.item!=undefined) {
+            console.log("defaultItem="+params.item)
+            if(params.item.includes('/')) {
+                console.log("NO need to include /")
+                config.defaultItem=params.item
+            } else {
+                console.log("need to include /")
+                config.defaultItem=config.defaultSubject+"/"+params.item
+            }
+        }
+    }
 	//render selectors
     DEBUG && console.log("config.defaultSubject="+config.defaultSubject)
     rebuildListSelector(subject_list_selector,lists,config.defaultSubject)
@@ -257,15 +272,19 @@ function addIt() {
 }
 
 function showAdd() {
-
     $("#addDiv").toggle()
-
 }
 
+function calcNewHREF() {
+    return window.location.origin+"/?subject="+lists[$('#'+subject_list_selector).val()].subject+"&item="+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()];
+}
 
-// define(["jquery", "utils"], function($) {
-//     //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
-//     $(function() {
-//         startTodo()
-//     });
-// });
+function copyLink() {
+    console.log(window.location)
+    console.log("current item="+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
+    console.log("current subject="+lists[$('#'+subject_list_selector).val()].subject);
+    //copyToClipBoard("something?subject="+lists[$('#'+subject_list_selector).val()].subject+"&item="+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()])
+    console.log("new href="+calcNewHREF())
+    copyToClipBoard(calcNewHREF())
+}
+

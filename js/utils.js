@@ -55,7 +55,24 @@ function clearWinner() {
     }
 }
 
-
+function copyToClipBoard(text){
+    var c=document.getElementById('copytext');
+    c.value=text;
+    
+    var x=document.getElementById('hiddentext');
+    x.style.display="block";
+    
+        c.select();
+        try {
+      var successful = document.execCommand('copy')
+      var msg = successful ? 'successfully' : 'unsuccessfully'
+      alert('Copied!');
+        }catch(err) {
+      alert('Falied to copy.');
+        }
+        x.style.display="none";
+  }
+  
 
 
 function calcValue(v,tv) {
@@ -157,15 +174,34 @@ function moveDown(i) {
     }
 }
 
+//Move to todo.js
 function resetCoolDown(i) {
     arrayOfContent[i].expires=0;
     render();
 }
 
+//Move to todo.js
 function isInCoolDown(item) {
     var d=new Date();
     return (item.expires!=undefined && item.expires>d.getTime());
 }
+
+//Move to todo.js
+function embedURL(str) {
+    const myArr = str.split(" ");
+    var newArray = [];
+    for(var i=0; i<myArr.length; i++) {
+        if(myArr[i].includes(";http")) {
+            newArray.push("<a href=\""+myArr[i].split(';')[1]+"\" target=_blank>"+myArr[i].split(';')[0]+"</a>")
+        } else {
+            newArray.push(myArr[i])
+        }
+    }
+    return newArray.join(" ")
+}
+
+
+//Move to todo.js
 function renderRow(i) {
     //add delete column
     //var row="<td name=\"delcol\"><button onclick=\"deleteit("+i+")\">Delete</button></td>";
@@ -220,9 +256,13 @@ function renderRow(i) {
         }
         
         if(arrayOfContent[i].json!=undefined) {
-            row+="<td><a href=\"javascript:SaveAndLoad('"+arrayOfContent[i].json+"')\">"+prepend+arrayOfContent[i].name+append+"</a></td>";
+            row+="<td>"+
+            prepend+arrayOfContent[i].name+append+" "+
+            "<a href=\"javascript:SaveAndLoad('"+arrayOfContent[i].json+"')\">"+
+            "<i class=\"fas fa-external-link-alt\"></i>"+
+            "</a></td>";
         } else {
-            row+="<td>"+prepend+arrayOfContent[i].name+append+"</td>";
+            row+="<td>"+prepend+embedURL(arrayOfContent[i].name)+append+"</td>";
         }
     }
     

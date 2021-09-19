@@ -368,7 +368,10 @@ function ENVvaristrue(m) {
 }
 app.get("/*", function(req, res) {
 	var url=req.url;
-	
+	if(req.url.includes('?')) {
+	    url=req.url.split('?')[0];
+	}
+			
 	if(ENVvaristrue(process.env.STRICT) && (url.startsWith(process.env.PREFIX) || url.startsWith("/"+process.env.PREFIX))) {
 		console.log("REJECTED:"+url)
 		res.status(403).send({ error: 'Permission Denied' })
@@ -383,7 +386,7 @@ app.get("/*", function(req, res) {
 	}
 
 	var contentType="text/plain";	
-	if(req.url.toString()=="/") {
+	if(url.toString()=="/") {
 		url=index_html;
 		contentType="text/html";
 	} else if(url.endsWith(".js")){
