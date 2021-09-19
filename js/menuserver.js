@@ -372,7 +372,7 @@ async function startMenuserver() {
     
     //DEBUG && console.log("config.defaultItem="+config.defaultItem)
 	//rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,config.defaultItem)
-
+    var haveSplash=false;
     //build out the menu
     const renderedPageSet=new Set();
     for(var i=0; i<topMenus.length; i++) {
@@ -394,7 +394,11 @@ async function startMenuserver() {
                    renderedPageSet.add(topMenus[i].submenus[submenu_index].id)
                 }
             }
-            addMajorMenu("myTopnav",topMenus[i].subject, topMenus[i].submenus)
+            if(topMenus[i].subject!="Splash") {
+                addMajorMenu("myTopnav",topMenus[i].subject, topMenus[i].submenus)
+            } else {
+                haveSplash=true;
+            }
         } else {
             console.log("---- entries is null for j="+j+"---");
         }
@@ -405,5 +409,12 @@ async function startMenuserver() {
 
     //load default topic and json
     addMajorMenuHamburger("myTopnav")
+
+    //render splash
+
+    if(haveSplash) {
+        console.log("show splash")
+        showPage('splash');
+    }
 	render();
 }
