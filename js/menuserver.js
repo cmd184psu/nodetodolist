@@ -243,7 +243,15 @@ function arrayToDropDown(arrayContent) {
     var content="<div class=\"dropdown-content\">";
     for(var i=0; i<arrayContent.length; i++) {
         console.log("arrayToDropDown::id="+arrayContent[i].id);
-        content+="<a href=\"javascript:showPage(\'"+arrayContent[i].id+"\')\">"+titleCase(arrayContent[i].title)+"</a>";
+
+        if(arrayContent[i].url!=undefined) {
+            var title=arrayContent[i].url;
+            if(arrayContent[i].title!=undefined) title=arrayContent[i].title
+
+            content+="<a href=\""+arrayContent[i].url+"\"  target=\"_blank\">"+title+"</a>"
+        } else {
+            content+="<a href=\"javascript:showPage(\'"+arrayContent[i].id+"\')\">"+titleCase(arrayContent[i].title)+"</a>";
+        }
     }
     content+="</div>";
     return content;
@@ -308,7 +316,7 @@ function addPage(el,json) {
     
     var content="<div id=\""+json.id+"\" class=\"pageClass\" "+s+" ><h2>"+json.title+"</h2>"; 
     
-    if(json.url!=undefined) content+="<a href=\""+json.url+"\"  target=\"_blank\">"+json.url+"</a>";
+    //if(json.url!=undefined) content+="<a href=\""+json.url+"\"  target=\"_blank\">"+json.url+"</a>";
         
     content+="<BR>";
     content+="<table style=\"border-collapse: separate; border-spacing: 15px 20px;\">"
