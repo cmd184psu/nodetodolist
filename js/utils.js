@@ -166,29 +166,29 @@ function resetDueDate(i) {
 
 
 
-function moveUp(i) {
-    if(i==0) {
-        console.log("already at end of list");
-    } else {
-        console.log("move i="+i+" to "+(i-1));
+// function moveUp(i) {
+//     if(i==0) {
+//         console.log("already at end of list");
+//     } else {
+//         console.log("move i="+i+" to "+(i-1));
 
-        var temp=arrayOfContent[i];
-        arrayOfContent[i]=arrayOfContent[i-1];
-        arrayOfContent[i-1]=temp;
-        render();
-    }
-}
-function moveDown(i) {
-    if(i==arrayOfContent.length-1) {
-        console.log("already at end of list");
-    } else {
-        console.log("move i="+i+" to "+(i+1));
-        var temp=arrayOfContent[i];
-        arrayOfContent[i]=arrayOfContent[i+1];
-        arrayOfContent[i+1]=temp;
-        render();
-    }
-}
+//         var temp=arrayOfContent[i];
+//         arrayOfContent[i]=arrayOfContent[i-1];
+//         arrayOfContent[i-1]=temp;
+//         render();
+//     }
+// }
+// function moveDown(i) {
+//     if(i==arrayOfContent.length-1) {
+//         console.log("already at end of list");
+//     } else {
+//         console.log("move i="+i+" to "+(i+1));
+//         var temp=arrayOfContent[i];
+//         arrayOfContent[i]=arrayOfContent[i+1];
+//         arrayOfContent[i+1]=temp;
+//         render();
+//     }
+// }
 
 //Move to todo.js
 function resetCoolDown(i) {
@@ -247,11 +247,12 @@ function renderRow(i) {
     //else  if(arrayOfContent[i].inProgress) trbit="<tr bgcolor=lightgreen>";
     //else trbit="<tr>";
     trbit=""
-    updown+="<td><span onclick=\"gripIt("+i+")\"><i class=\"fas fas fa-grip-lines\"></i></span></td>";
-    updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
-    updown+="<td><span onclick=\"moveDown("+i+")\"><i class=\"fas fa-angle-double-down\"></i></span></td>";
+// up / down deprecated ;  gripit not needed
+    //    updown+="<td><span onclick=\"gripIt("+i+")\"><i class=\"fas fas fa-grip-lines\"></i></span></td>";
+//    updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
     updown+="<td><span onclick=\"onHoldFlip("+i+")\"><i class=\"fas fa-hand-paper\"></i></td>";
     updown+="<td><span onclick=\"inProgressFlip("+i+")\"<i class=\"fas fa-play\"></i></td>";
+    updown+="<td>&nbsp;&nbsp;&nbsp;</td>";
     updown+="<td><span onclick=\"deleteit("+i+")\"><i class=\"fa fa-trash\"></i></td>";
     updown+="<td>"+trophy+"</td>";
     updown+="</tr></table>";

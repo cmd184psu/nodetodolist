@@ -1,6 +1,7 @@
 var config=new Object;
 var arrayOfContent=[];
 var lists=[]
+var savebutton=false;
 
 const item_list_selector='item-list-selector'
 const subject_list_selector='subject-list-selector'
@@ -14,11 +15,14 @@ const restrictedsave=false
 const showsavealert=false
 //const BASE='lists/'
 
-function SaveList(content,filename) {
+function SaveList(content,filename,sb) {
     if(filename==undefined) {
         throw error
         //return
     }
+
+    savebutton=(sb!=undefined && sb)
+
     DEBUG && console.log("SaveList(...content...,"+filename+");");
     $('#saveButton').prop('disabled', true);
 
@@ -49,7 +53,10 @@ function SaveList(content,filename) {
         success: function (data) {
            $('#saveButton').prop('disabled', false);
            console.log("success in saving content for filename: "+this.url)
-           if(showsavealert) alert(data.msg)
+           if(showsavealert || savebutton) {
+               alert(data.msg)
+               savebutton=false;
+           }
        },
        data: JSON.stringify(content), // content to send; has to be stringified, even though it's application/json
        error: function(err){   //something bad happened and ajax is unhappy
@@ -85,9 +92,9 @@ async function loadList(fn) {
 }
 
 
-function saveit() {
+function saveit(sb) {
     if($("#titleDiv").text()=="") { 
-        if(currentFilename!=undefined) SaveList(arrayOfContent,currentFilename);
+        if(currentFilename!=undefined) SaveList(arrayOfContent,currentFilename,sb);
         return
     }
     
@@ -95,7 +102,7 @@ function saveit() {
     
     data.list=arrayOfContent
     data.title=$("#titleDiv").text();
-    if(currentFilename!=undefined) SaveList(data,currentFilename);
+    if(currentFilename!=undefined) SaveList(data,currentFilename,sb);
     
 }
 
