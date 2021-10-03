@@ -12,8 +12,6 @@ var currentFilename="";
 var priorFilename="";
 var maxVotes=0;
 
-const DEBUG_UTILS=false
-
 
 //var globalData=[]  -- replace with arrayOfContent
 var globalEL="thetable"
@@ -37,19 +35,21 @@ function reIndex() {
 //         $.get(BASE+filename,"", function(result) { resolve(result); });
 //     });
 // }
-function ajaxGet(uri) {
-	return new Promise((resolve, reject) => {
-        $.get(uri,"", function(result) { resolve(result); });
-    });
-}
 
-function ajaxGetJSON(uri) {
-    return new Promise((resolve, reject) => {
-        fetch(uri).then(async (response)=> {
-            resolve(await response.json())
-        })
-    })
-}    
+//moved to utils.js
+// function ajaxGet(uri) {
+// 	return new Promise((resolve, reject) => {
+//         $.get(uri,"", function(result) { resolve(result); });
+//     });
+// }
+
+// function ajaxGetJSON(uri) {
+//     return new Promise((resolve, reject) => {
+//         fetch(uri).then(async (response)=> {
+//             resolve(await response.json())
+//         })
+//     })
+// }    
 
 function dropVars() {
     for(var i=0; i<arrayOfContent.length; i++) {
@@ -71,23 +71,24 @@ function clearWinner() {
     }
 }
 
-function copyToClipBoard(text){
-    var c=document.getElementById('copytext');
-    c.value=text;
+//moved to utils.js
+// function copyToClipBoard(text){
+//     var c=document.getElementById('copytext');
+//     c.value=text;
     
-    var x=document.getElementById('hiddentext');
-    x.style.display="block";
+//     var x=document.getElementById('hiddentext');
+//     x.style.display="block";
     
-        c.select();
-        try {
-      var successful = document.execCommand('copy')
-      var msg = successful ? 'successfully' : 'unsuccessfully'
-      alert('Copied!');
-        }catch(err) {
-      alert('Falied to copy.');
-        }
-        x.style.display="none";
-  }
+//         c.select();
+//         try {
+//       var successful = document.execCommand('copy')
+//       var msg = successful ? 'successfully' : 'unsuccessfully'
+//       alert('Copied!');
+//         }catch(err) {
+//       alert('Falied to copy.');
+//         }
+//         x.style.display="none";
+//   }
   
 
 
@@ -132,24 +133,25 @@ function inProgressFlip(i) {
     saveit();
 }
 
-function DaysToMS(days) {
-	//return days*24*60*60*1000;
-	return days*86400000;
-}
+//moved to utils
+// function DaysToMS(days) {
+// 	//return days*24*60*60*1000;
+// 	return days*86400000;
+// }
 
-function EpocMStoISODate(ms) {
-	var d=new Date(ms);
-	return formatedDate(d);
-}
+// function EpocMStoISODate(ms) {
+// 	var d=new Date(ms);
+// 	return formatedDate(d);
+// }
 
-function isDueNow(ms) {
-    var now=new Date();
-    return ms<now.getTime();
-}
+// function isDueNow(ms) {
+//     var now=new Date();
+//     return ms<now.getTime();
+// }
 
-function formatedDate(d) {
-    return (d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear();
-}
+// function formatedDate(d) {
+//     return (d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear();
+// }
 
 function resetDueDate(i) {
     var now=new Date();
@@ -202,24 +204,24 @@ function isInCoolDown(item) {
     return (item.expires!=undefined && item.expires>d.getTime());
 }
 
-//Move to todo.js
-function embedURL(str) {
-    const myArr = str.split(" ");
-    var newArray = [];
-    for(var i=0; i<myArr.length; i++) {
-        if(myArr[i].includes(";http")) {
-            newArray.push("<a href=\""+myArr[i].split(';')[1]+"\" target=_blank>"+myArr[i].split(';')[0]+"</a>")
-        } else {
-            newArray.push(myArr[i])
-        }
-    }
-    return newArray.join(" ")
-}
+//Move to utils.js
+// function embedURL(str) {
+//     const myArr = str.split(" ");
+//     var newArray = [];
+//     for(var i=0; i<myArr.length; i++) {
+//         if(myArr[i].includes(";http")) {
+//             newArray.push("<a href=\""+myArr[i].split(';')[1]+"\" target=_blank>"+myArr[i].split(';')[0]+"</a>")
+//         } else {
+//             newArray.push(myArr[i])
+//         }
+//     }
+//     return newArray.join(" ")
+// }
 
-//Move to todo.js
-function gripIt(i) {
-    console.log("got a grip on it for i="+i)
-}
+//not used
+// function gripIt(i) {
+//     console.log("got a grip on it for i="+i)
+// }
 
 //Move to todo.js
 function renderRow(i) {
@@ -486,58 +488,58 @@ function vote() {
     render();
 }
 
-
-function genTableHeader(arr) {
-    //console.log("get here")
-    //row to return
-    var ret=document.createElement("tr");  
-
-    
-    for(var i=0; i<arr.length; i++) {
-        console.log("creating new header cell")
-        var tableheadCell= document.createElement("th")
-        console.log("\tsetting header text to "+arr[i]);
-        tableheadCell.innerText = arr[i];
-        ret.append(tableheadCell)
-    }
-    return ret
-}
-
-function genTableFooter(arr) {
-    //console.log("get here")
-    //row to return
-    var ret=document.createElement("tr");  
+//moved to utils.js
+// function genTableHeader(arr) {
+//     //console.log("get here")
+//     //row to return
+//     var ret=document.createElement("tr");  
 
     
-    for(var i=0; i<arr.length; i++) {
-        console.log("creating new header cell")
-        var tableheadCell= document.createElement("th")
+//     for(var i=0; i<arr.length; i++) {
+//         console.log("creating new header cell")
+//         var tableheadCell= document.createElement("th")
+//         console.log("\tsetting header text to "+arr[i]);
+//         tableheadCell.innerText = arr[i];
+//         ret.append(tableheadCell)
+//     }
+//     return ret
+// }
 
-        if(arr[i]==null) {
+// function genTableFooter(arr) {
+//     //console.log("get here")
+//     //row to return
+//     var ret=document.createElement("tr");  
+
+    
+//     for(var i=0; i<arr.length; i++) {
+//         console.log("creating new header cell")
+//         var tableheadCell= document.createElement("th")
+
+//         if(arr[i]==null) {
 
 
-            tableheadCell.innerHTML = "&nbsp;"
+//             tableheadCell.innerHTML = "&nbsp;"
 
-        } else {
-            if (arr[i].text!=undefined) {
-                console.log("\tsetting header text to "+arr[i].text);
-                tableheadCell.innerText = arr[i].text;
-            } 
-            if(arr[i].colSpan!=undefined) {
-                tableheadCell.colSpan=arr[i].colSpan;
-            }
-        }
-        ret.append(tableheadCell)
-    }
-    return ret
-}
+//         } else {
+//             if (arr[i].text!=undefined) {
+//                 console.log("\tsetting header text to "+arr[i].text);
+//                 tableheadCell.innerText = arr[i].text;
+//             } 
+//             if(arr[i].colSpan!=undefined) {
+//                 tableheadCell.colSpan=arr[i].colSpan;
+//             }
+//         }
+//         ret.append(tableheadCell)
+//     }
+//     return ret
+// }
 
 //render currently loaded content
 //also demonstrates how to use QUIET_LOCAL vs DEBUG_UTILS correctly
 
 function render() {
     reIndex();
-    var QUIET_LOCAL=!DEBUG_UTILS && true
+    var QUIET_LOCAL=true
 
     //console.log("---> render()::QUIET_LOCAL="+QUIET_LOCAL)
     //console.log("---> render()::DEBUG_UTILS="+DEBUG_UTILS)
@@ -607,7 +609,7 @@ function render() {
 
 function OLDrender() {
 
-    var QUIET_LOCAL=!DEBUG_UTILS && true
+    var QUIET_LOCAL=true
 
     //console.log("---> render()::QUIET_LOCAL="+QUIET_LOCAL)
     //console.log("---> render()::DEBUG_UTILS="+DEBUG_UTILS)
@@ -655,7 +657,7 @@ function OLDrender() {
 }
 
 function rebuildListSelector(s,l,desired) {
-    const DEBUG_LOCAL=DEBUG_UTILS || false
+    const DEBUG_LOCAL=false
     DEBUG_LOCAL && console.log("==>rebuildListSelector("+s+",list,"+(desired || "none")+")");
     $('#'+s)
     .find('option')
@@ -683,78 +685,61 @@ function rebuildListSelector(s,l,desired) {
     return retIndex;
 }
 
-
-$.fn.checkUtils = function() {
-    console.log("get here")
-    return this.append('<p>utils is Go!</p>');
-};
-
-
-function titleCase(str) {
-    let upper = true
-    let newStr = ""
-    for (let i = 0, l = str.length; i < l; i++) {
-        // Note that you can also check for all kinds of spaces  with
-        // str[i].match(/\s/)
-        if (str[i] == " ") {
-            upper = true
-            newStr += str[i]
-            continue
-        }
-        newStr += upper ? str[i].toUpperCase() : str[i].toLowerCase()
-        upper = false
-    }
-    return newStr
-}
-
-function toggle(id) {
-	var x = document.getElementById(id+"_inner");
-	if (x.style.display === "none") {
-		x.style.display = "block";
-	} else {
-		x.style.display = "none";
-	}
-	var y = document.getElementById(id+"_hidden");
-
-	if (y.style.display === "none") {
-		y.style.display = "block";
-	} else {
-		y.style.display = "none";
-	}
-}
+//move to utils.js
+// $.fn.checkUtils = function() {
+//     console.log("get here")
+//     return this.append('<p>utils is Go!</p>');
+// };
 
 
-function copyToClipBoard(text){
-  var c=document.getElementById('copytext');
-  c.value=text;
-  
-  var x=document.getElementById('hiddentext');
-  x.style.display="block";
-  
-      c.select();
-      try {
-    var successful = document.execCommand('copy')
-    var msg = successful ? 'successfully' : 'unsuccessfully'
-    alert('Copied!');
-      }catch(err) {
-    alert('Falied to copy.');
-      }
-      x.style.display="none";
-}
+// function titleCase(str) {
+//     let upper = true
+//     let newStr = ""
+//     for (let i = 0, l = str.length; i < l; i++) {
+//         // Note that you can also check for all kinds of spaces  with
+//         // str[i].match(/\s/)
+//         if (str[i] == " ") {
+//             upper = true
+//             newStr += str[i]
+//             continue
+//         }
+//         newStr += upper ? str[i].toUpperCase() : str[i].toLowerCase()
+//         upper = false
+//     }
+//     return newStr
+// }
 
-function makeID(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-      result += characters.charAt(Math.floor(Math.random() * 
- charactersLength));
-   }
-   return result;
-}
 
-function href(url,label) {
-   if(label==undefined) return "<href=\""+url+"\">"+url+"</a>";
+// function toggle(id) {
+// 	var x = document.getElementById(id+"_inner");
+// 	if (x.style.display === "none") {
+// 		x.style.display = "block";
+// 	} else {
+// 		x.style.display = "none";
+// 	}
+// 	var y = document.getElementById(id+"_hidden");
 
-   return "<href=\""+url+"\" target=_>"+label+"</a>";
-}
+// 	if (y.style.display === "none") {
+// 		y.style.display = "block";
+// 	} else {
+// 		y.style.display = "none";
+// 	}
+// }
+
+
+// function makeID(length) {
+//     var result           = '';
+//     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//     var charactersLength = characters.length;
+//     for ( var i = 0; i < length; i++ ) {
+//       result += characters.charAt(Math.floor(Math.random() * 
+//  charactersLength));
+//    }
+//    return result;
+// }
+
+// function href(url,label) {
+//    if(label==undefined) return "<href=\""+url+"\">"+url+"</a>";
+
+//    return "<href=\""+url+"\" target=_>"+label+"</a>";
+// }
