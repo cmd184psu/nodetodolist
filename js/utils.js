@@ -14,6 +14,21 @@ var maxVotes=0;
 
 const DEBUG_UTILS=false
 
+
+//var globalData=[]  -- replace with arrayOfContent
+var globalEL="thetable"
+var draggedOver=-1
+var dragging=-1
+
+function reIndex() {
+  for(var i=0; i<arrayOfContent.length; i++) {
+      console.log("trying to set idx of i="+i+" out of "+arrayOfContent.length)
+    arrayOfContent[i].idx=i;
+  }
+}
+
+
+
 // function LoadFile(filename) {
 // 	return new Promise((resolve, reject) => {
 
@@ -47,6 +62,7 @@ function dropVars() {
         arrayOfContent[i].vote=undefined;
         arrayOfContent[i].expires=undefined;
         arrayOfContent[i].tempSkip=undefined;
+        arrayOfContent[i].idx=undefined;
     }
 }
 function clearWinner() {
@@ -200,6 +216,10 @@ function embedURL(str) {
     return newArray.join(" ")
 }
 
+//Move to todo.js
+function gripIt(i) {
+    console.log("got a grip on it for i="+i)
+}
 
 //Move to todo.js
 function renderRow(i) {
@@ -223,9 +243,11 @@ function renderRow(i) {
     //else 
     updown+="<tr>";
 
-    if(arrayOfContent[i].onHold) trbit="<tr bgcolor=pink>";
-    else  if(arrayOfContent[i].inProgress) trbit="<tr bgcolor=lightgreen>";
-    else trbit="<tr>";
+    //if(arrayOfContent[i].onHold) trbit="<tr bgcolor=pink>";
+    //else  if(arrayOfContent[i].inProgress) trbit="<tr bgcolor=lightgreen>";
+    //else trbit="<tr>";
+    trbit=""
+    updown+="<td><span onclick=\"gripIt("+i+")\"><i class=\"fas fas fa-grip-lines\"></i></span></td>";
     updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
     updown+="<td><span onclick=\"moveDown("+i+")\"><i class=\"fas fa-angle-double-down\"></i></span></td>";
     updown+="<td><span onclick=\"onHoldFlip("+i+")\"><i class=\"fas fa-hand-paper\"></i></td>";
@@ -300,9 +322,70 @@ function renderRow(i) {
 
     
     //return "<tr>"+row+"</tr>";
-    return trbit+row+"</tr>";
+//    return trbit+row+"</tr>";
+    return trbit+row;
 }
 
+
+function compare(e) {
+    var p=arrayOfContent[dragging]
+    arrayOfContent.splice(dragging, 1)
+    //insert globalData[dragging] in draggedOver's spot
+    arrayOfContent.splice(draggedOver, 0, p)
+    console.log(JSON.stringify(arrayOfContent,null,3))
+    //reIndex()
+    
+    //console.log(JSON.stringify(arrayOfContent,null,3))
+
+    saveit()
+
+    render()
+  }
+      
+  function setDraggedOver(e) {
+    e.preventDefault();
+    draggedOver = parseInt(e.target.parentNode.id.substr(4))
+  }
+  
+  function setDragging(e) {
+    //list2 becomes 2, meaning that the 3rd row (index=2) is dragging right now
+    dragging = e.target.id.substr(4)
+  }
+
+
+
+
+
+function genRow(i) {
+    var node= document.createElement("tr");    
+
+
+      var item= arrayOfContent[i];
+      node.draggable = true
+      node.id="list"+item.idx
+      
+      if(arrayOfContent[i].onHold) node.style.backgroundColor = "pink"
+      else  if(arrayOfContent[i].inProgress) node.style.backgroundColor = "lightgreen"
+      
+      //TODO: this comes next!!!
+      node.addEventListener('drag', setDragging) 
+      node.addEventListener('dragover', setDraggedOver)
+      node.addEventListener('drop', compare) 
+
+    node.innerHTML=renderRow(i)
+
+      //hold it
+    //   var subnode=document.createElement("td")
+    //   subnode.innerText=item.col1
+    //   node.appendChild(subnode)
+    //   if(item.col2!=undefined) {
+    //     subnode=document.createElement("td")
+    //     subnode.innerText=item.col2
+    //     node.appendChild(subnode)
+    //   }
+    return node;
+
+}
 function eligibleToVote(item) {
     var d=new Date();
     if(item.skip || item.onHold) return false;
@@ -402,15 +485,136 @@ function vote() {
     render();
 }
 
+
+function genTableHeader(arr) {
+    //console.log("get here")
+    //row to return
+    var ret=document.createElement("tr");  
+
+    
+    for(var i=0; i<arr.length; i++) {
+        console.log("creating new header cell")
+        var tableheadCell= document.createElement("th")
+        console.log("\tsetting header text to "+arr[i]);
+        tableheadCell.innerText = arr[i];
+        ret.append(tableheadCell)
+    }
+    return ret
+}
+
+function genTableFooter(arr) {
+    //console.log("get here")
+    //row to return
+    var ret=document.createElement("tr");  
+
+    
+    for(var i=0; i<arr.length; i++) {
+        console.log("creating new header cell")
+        var tableheadCell= document.createElement("th")
+
+        if(arr[i]==null) {
+
+
+            tableheadCell.innerHTML = "&nbsp;"
+
+        } else {
+            if (arr[i].text!=undefined) {
+                console.log("\tsetting header text to "+arr[i].text);
+                tableheadCell.innerText = arr[i].text;
+            } 
+            if(arr[i].colSpan!=undefined) {
+                tableheadCell.colSpan=arr[i].colSpan;
+            }
+        }
+        ret.append(tableheadCell)
+    }
+    return ret
+}
+
 //render currently loaded content
 //also demonstrates how to use QUIET_LOCAL vs DEBUG_UTILS correctly
 
 function render() {
+    reIndex();
+    var QUIET_LOCAL=!DEBUG_UTILS && true
+
+    //console.log("---> render()::QUIET_LOCAL="+QUIET_LOCAL)
+    //console.log("---> render()::DEBUG_UTILS="+DEBUG_UTILS)
+
+    var t=document.getElementById(globalEL)
+    t.innerHTML=''
+    t.appendChild(genTableHeader(
+        [
+            "Complete",
+            "Control",
+            "Priority",
+            "The Item",
+            "votes",
+            "Period (in days)",
+            "Next Due Date",
+            "Cooldown"
+        ]));
+        
+   
+
+
+//    var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Period (in days)</th><th>Next Due Date</th><th>Cooldown</th></tr>";
+        var content=""
+    QUIET_LOCAL || console.log("length of array="+arrayOfContent.length);
+    //console.log(JSON.stringify(arrayOfContent,null,3));
+    for(var i=0; i<arrayOfContent.length; i++) {
+
+        t.appendChild(genRow(i))
+
+        //content+=renderRow(i);
+		// for recurring expiration
+    	if(arrayOfContent[i].periodic!=undefined && arrayOfContent[i].periodic) {
+			QUIET_LOCAL || console.log("==>"+i+"th can expire");    
+
+			//new variables:
+			//periodic - boolean; if true, this item is a recurring item
+			//nextDue  - milliseconds since the EPOC / UTC, usually in the future; this is the next due date for this recurring item
+			//period   - duration between due dates in days		
+
+            if(isDueNow(arrayOfContent[i].nextDue)) {
+                QUIET_LOCAL || console.log("\tdue now and again in "+arrayOfContent[i].period+" days");
+            } else {
+                QUIET_LOCAL || console.log("\tdue in the future: "+EpocMStoISODate(arrayOfContent[i].nextDue));
+			} 
+		} else {
+			QUIET_LOCAL || console.log("==>"+i+"th does not expire");
+		}
+    }
+
+    //content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td colspan=3>=====</td></tr>";
+    
+    t.appendChild(genTableFooter([ null, null,null, { "text" : "Totals" }, { "text" : TotalVotes(arrayOfContent) }, { "text" : "=====", "colSpan" : 3 }]))
+
+
+    //temporarily, don't draw the table
+    //document.getElementById(globalEL).innerHTML=content;
+
+
+
+    // for cooldown
+    var now=new Date();
+    var future=new Date(60000+now.getTime());
+    QUIET_LOCAL || console.log("==== "+(future.getUTCMilliseconds()-now.getUTCMilliseconds()));
+    QUIET_LOCAL || console.log("now: "+formatedDate(now));
+    QUIET_LOCAL || console.log("future: "+formatedDate(future));
+}
+
+function OLDrender() {
 
     var QUIET_LOCAL=!DEBUG_UTILS && true
 
     //console.log("---> render()::QUIET_LOCAL="+QUIET_LOCAL)
     //console.log("---> render()::DEBUG_UTILS="+DEBUG_UTILS)
+
+
+
+
+
 
     var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Period (in days)</th><th>Next Due Date</th><th>Cooldown</th></tr>";
     QUIET_LOCAL || console.log("length of array="+arrayOfContent.length);
@@ -439,13 +643,14 @@ function render() {
     content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td colspan=3>=====</td></tr>";
     
     //temporarily, don't draw the table
-    document.getElementById("thetable").innerHTML=content;
+    document.getElementById(globalEL).innerHTML=content;
     // for cooldown
     var now=new Date();
     var future=new Date(60000+now.getTime());
     QUIET_LOCAL || console.log("==== "+(future.getUTCMilliseconds()-now.getUTCMilliseconds()));
     QUIET_LOCAL || console.log("now: "+formatedDate(now));
     QUIET_LOCAL || console.log("future: "+formatedDate(future));
+
 }
 
 function rebuildListSelector(s,l,desired) {
