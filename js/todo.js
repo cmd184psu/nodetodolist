@@ -65,8 +65,38 @@ function SaveList(content,filename) {
    });
 }
 
+async function loadList(fn) {
+    var allContent=await ajaxGetJSON(fn)
+    if(Array.isArray(allContent)) {
+        console.log("loadList("+fn+") returning just array with length = "+allContent.length)
+        return allContent;
+    }
+    // else {
+    //<div id="titleDiv" style="display:none">Title: not implemented</div>
+    if(allContent.title!=undefined) {
+        $("#titleDiv").show();
+        $("#titleDiv").html(allContent.title)
+        
+        console.log("setting title to "+allContent.title)
+    }
+    //}
+    console.log("loadList("+fn+") setting title and returning array with length = "+allContent.list.length)
+    return allContent.list
+}
+
+
 function saveit() {
-    if(currentFilename!=undefined) SaveList(arrayOfContent,currentFilename);
+    if($("#titleDiv").text()=="") { 
+        if(currentFilename!=undefined) SaveList(arrayOfContent,currentFilename);
+        return
+    }
+    
+    var data=new Object()
+    
+    data.list=arrayOfContent
+    data.title=$("#titleDiv").text();
+    if(currentFilename!=undefined) SaveList(data,currentFilename);
+    
 }
 
 
@@ -124,8 +154,11 @@ async function SelectNewFile(nf) {
    
     if(currentFilename!=undefined && config.autosave) SaveList(arrayOfContent,currentFilename);
  
+    $("#titleDiv").text("")
+    $("#titleDiv").hide()
 
-    arrayOfContent=await ajaxGetJSON('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
+    //arrayOfContent=await ajaxGetJSON('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
+    arrayOfContent=await loadList('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
     currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()];
     render();
 
@@ -232,7 +265,24 @@ async function startTodo(params) {
     previousFilename=undefined // on purpose, also disable back button
     $("#backBTN").prop("disabled",true);
     DEBUG && console.log("loading: "+currentFilename)
-    arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
+    //arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
+
+    arrayOfContent=await loadList('items/'+currentFilename)
+    // var allContent=await ajaxGetJSON('items/'+currentFilename)
+    // if(Array.isArray(allContent)) {
+    //     arrayOfContent=allContent;
+    // } else {
+    //     arrayOfContent=allContent.list;
+    //     //<div id="titleDiv" style="display:none">Title: not implemented</div>
+    //     if(allContent.title!=undefined) {
+    //         $("#titleDiv").show();
+    //         $("#titleDiv").html(allContent.title)
+           
+    //         console.log("setting title to "+allContent.title)
+    //     }
+    // }
+
+
 
 	//render it
 	render();
