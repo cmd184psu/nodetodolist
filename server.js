@@ -82,8 +82,9 @@ var flatdb=BASE+"/data.json";
 
 //console.log("sending: "+flatdb);
 app.get('/config', function(req, res) {
-	//config=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
-	
+	if (fs.existsSync(flatdb)) {
+		config=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
+	}
 	var content=new Object
 	content.defaultSubject=config.defaultSubject || process.env.DEFAULTSUBJECT || "home"
 
