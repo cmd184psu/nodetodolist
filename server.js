@@ -78,7 +78,7 @@ function prettyPrint(req, res, content) {
 	}
 }
 
-//var flatdb=BASE+"/data.json";
+var flatdb=BASE+"/data.json";
 
 //console.log("sending: "+flatdb);
 app.get('/config', function(req, res) {
