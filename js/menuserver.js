@@ -7,14 +7,14 @@ const subject_list_selector='subject-list-selector'
 var currentFilename=undefined
 var previousFilename=undefined
 
-const DEBUG=true
+const DEBUG=false
 
 const skipsave=false
 const restrictedsave=false
 const showsavealert=false
 //const BASE='lists/'
 
-var SHOWALLPAGES=true;
+var SHOWALLPAGES=false;
 
 function SaveList(content,filename) {
     if(filename==undefined) {
@@ -243,7 +243,15 @@ function arrayToDropDown(arrayContent) {
     var content="<div class=\"dropdown-content\">";
     for(var i=0; i<arrayContent.length; i++) {
         console.log("arrayToDropDown::id="+arrayContent[i].id);
-        content+="<a href=\"javascript:showPage(\'"+arrayContent[i].id+"\')\">"+titleCase(arrayContent[i].title)+"</a>";
+
+        if(arrayContent[i].url!=undefined) {
+            var title=arrayContent[i].url;
+            if(arrayContent[i].title!=undefined) title=arrayContent[i].title
+
+            content+="<a href=\""+arrayContent[i].url+"\"  target=\"_blank\">"+title+"</a>"
+        } else {
+            content+="<a href=\"javascript:showPage(\'"+arrayContent[i].id+"\')\">"+titleCase(arrayContent[i].title)+"</a>";
+        }
     }
     content+="</div>";
     return content;
@@ -272,18 +280,22 @@ function renderSiteRow(site, i) {
    if(link=="" && label!="") content+="<tr><td colspan=2>"+label+"</td></tr>";
    else if(link!="" && label!="" && link!=label) content+="<tr><td colspan=2><a href=\""+link+"\" target=\"_blank\">"+label+"</a> : "+link+"</td></tr>";
    else if(link!="" && label!="" && link==label) content+="<tr><td colspan=2><a href=\""+link+"\" target=\"_blank\">"+label+"</a></td></tr>";
-      
-   content+=
-   "<tr><td>Username: </td><td>"+site.username+"</td></tr>"+
-   "<tr><td>Password: </td><td><div id=\""+site.prefix+"pwd"+i+"_inner\" style=\"display:none\">"+  
-   "<input type=text id=\""+site.prefix+"txt"+i+"\" value=\""+
-   site.password+"\"></div><div id=\""+site.prefix+"pwd"+i+"_hidden\" >xxxxxxxxxx</div></td></tr>"+
-   "<tr><td></td><td>"+
-   "<table><tr>"+
-   "<td><button type=\"button\" onclick=\"toggle(\'"+site.prefix+"pwd"+i+"\')\">Hide/Show</button></td>"+
-   "<td><button type=\"button\" onclick=\"copyToClipBoard(\'"+site.password+"\')\">Copy</button></td>"+
-   "</table>"+
-   "</td></tr>"
+   
+   
+   if(site.username!=undefined && site.username!="") {
+        content+=
+        "<tr><td>Username: </td><td>"+site.username+"</td></tr>"+
+        "<tr><td>Password: </td><td><div id=\""+site.prefix+"pwd"+i+"_inner\" style=\"display:none\">"+  
+        "<input type=text id=\""+site.prefix+"txt"+i+"\" value=\""+
+        site.password+"\"></div><div id=\""+site.prefix+"pwd"+i+"_hidden\" >xxxxxxxxxx</div></td></tr>"+
+        "<tr><td></td><td>"+
+        "<table><tr>"+
+        "<td><button type=\"button\" onclick=\"toggle(\'"+site.prefix+"pwd"+i+"\')\">Hide/Show</button></td>"+
+        "<td><button type=\"button\" onclick=\"copyToClipBoard(\'"+site.password+"\')\">Copy</button></td>"+
+        "</table>"+
+        "</td></tr>"
+
+    }
     return content;
 }
 
@@ -304,7 +316,7 @@ function addPage(el,json) {
     
     var content="<div id=\""+json.id+"\" class=\"pageClass\" "+s+" ><h2>"+json.title+"</h2>"; 
     
-    if(json.url!=undefined) content+="<a href=\""+json.url+"\"  target=\"_blank\">"+json.url+"</a>";
+    //if(json.url!=undefined) content+="<a href=\""+json.url+"\"  target=\"_blank\">"+json.url+"</a>";
         
     content+="<BR>";
     content+="<table style=\"border-collapse: separate; border-spacing: 15px 20px;\">"
@@ -324,8 +336,14 @@ function addPage(el,json) {
         "</tr>";
     }
 
-    content+="</table>"
-    $('#'+el).append(content+"</div><div><a href=\"#top\"><i class=\"fas fa-arrow-up\"></i></a></div><div class=\"pageClass\"><HR/><BR></div>");
+    content+="</table>"+
+             "</div>"
+    if(SHOWALLPAGES) {
+        content+="<div><a href=\"#top\"><i class=\"fas fa-arrow-up\"></i></a></div><div class=\"pageClass\"><HR/><BR></div>"
+
+    }
+
+    $('#'+el).append(content);
 }
 
 function showPage(el) {
@@ -343,6 +361,8 @@ async function startMenuserver() {
     //load /config into memory
 	config=await ajaxGetJSON("config/");
 
+
+    SHOWALLPAGES=config.showAllPages;
 	//load items into memory
 	topMenus=await ajaxGetJSON("items");
 
@@ -352,7 +372,7 @@ async function startMenuserver() {
     
     //DEBUG && console.log("config.defaultItem="+config.defaultItem)
 	//rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,config.defaultItem)
-
+    var haveSplash=false;
     //build out the menu
     const renderedPageSet=new Set();
     for(var i=0; i<topMenus.length; i++) {
@@ -374,7 +394,11 @@ async function startMenuserver() {
                    renderedPageSet.add(topMenus[i].submenus[submenu_index].id)
                 }
             }
-            addMajorMenu("myTopnav",topMenus[i].subject, topMenus[i].submenus)
+            if(topMenus[i].subject!="Splash") {
+                addMajorMenu("myTopnav",topMenus[i].subject, topMenus[i].submenus)
+            } else {
+                haveSplash=true;
+            }
         } else {
             console.log("---- entries is null for j="+j+"---");
         }
@@ -385,5 +409,12 @@ async function startMenuserver() {
 
     //load default topic and json
     addMajorMenuHamburger("myTopnav")
+
+    //render splash
+
+    if(haveSplash) {
+        console.log("show splash")
+        showPage('splash');
+    }
 	render();
 }

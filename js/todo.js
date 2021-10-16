@@ -1,6 +1,7 @@
 var config=new Object;
 var arrayOfContent=[];
 var lists=[]
+var savebutton=false;
 
 const item_list_selector='item-list-selector'
 const subject_list_selector='subject-list-selector'
@@ -14,11 +15,14 @@ const restrictedsave=false
 const showsavealert=false
 //const BASE='lists/'
 
-function SaveList(content,filename) {
+function SaveList(content,filename,sb) {
     if(filename==undefined) {
         throw error
         //return
     }
+
+    savebutton=(sb!=undefined && sb)
+
     DEBUG && console.log("SaveList(...content...,"+filename+");");
     $('#saveButton').prop('disabled', true);
 
@@ -49,7 +53,10 @@ function SaveList(content,filename) {
         success: function (data) {
            $('#saveButton').prop('disabled', false);
            console.log("success in saving content for filename: "+this.url)
-           if(showsavealert) alert(data.msg)
+           if(showsavealert || savebutton) {
+               alert(data.msg)
+               savebutton=false;
+           }
        },
        data: JSON.stringify(content), // content to send; has to be stringified, even though it's application/json
        error: function(err){   //something bad happened and ajax is unhappy
@@ -65,8 +72,38 @@ function SaveList(content,filename) {
    });
 }
 
-function saveit() {
-    if(currentFilename!=undefined) SaveList(arrayOfContent,currentFilename);
+async function loadList(fn) {
+    var allContent=await ajaxGetJSON(fn)
+    if(Array.isArray(allContent)) {
+        console.log("loadList("+fn+") returning just array with length = "+allContent.length)
+        return allContent;
+    }
+    // else {
+    //<div id="titleDiv" style="display:none">Title: not implemented</div>
+    if(allContent.title!=undefined) {
+        $("#titleDiv").show();
+        $("#titleDiv").html(allContent.title)
+        
+        console.log("setting title to "+allContent.title)
+    }
+    //}
+    console.log("loadList("+fn+") setting title and returning array with length = "+allContent.list.length)
+    return allContent.list
+}
+
+
+function saveit(sb) {
+    if($("#titleDiv").text()=="") { 
+        if(currentFilename!=undefined) SaveList(arrayOfContent,currentFilename,sb);
+        return
+    }
+    
+    var data=new Object()
+    
+    data.list=arrayOfContent
+    data.title=$("#titleDiv").text();
+    if(currentFilename!=undefined) SaveList(data,currentFilename,sb);
+    
 }
 
 
@@ -124,8 +161,11 @@ async function SelectNewFile(nf) {
    
     if(currentFilename!=undefined && config.autosave) SaveList(arrayOfContent,currentFilename);
  
+    $("#titleDiv").text("")
+    $("#titleDiv").hide()
 
-    arrayOfContent=await ajaxGetJSON('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
+    //arrayOfContent=await ajaxGetJSON('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
+    arrayOfContent=await loadList('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
     currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()];
     render();
 
@@ -198,13 +238,28 @@ function revertList() {
 }
 
 
-async function startTodo() {
+async function startTodo(params) {
     //load /config into memory
 	config=await ajaxGetJSON("config/");
 
 	//load items into memory
 	lists=await ajaxGetJSON("items");
 
+    if(params!=undefined) {
+        if(params.subject!=undefined) {
+            config.defaultSubject=params.subject
+        }
+        if(params.item!=undefined) {
+            console.log("defaultItem="+params.item)
+            if(params.item.includes('/')) {
+                console.log("NO need to include /")
+                config.defaultItem=params.item
+            } else {
+                console.log("need to include /")
+                config.defaultItem=config.defaultSubject+"/"+params.item
+            }
+        }
+    }
 	//render selectors
     DEBUG && console.log("config.defaultSubject="+config.defaultSubject)
     rebuildListSelector(subject_list_selector,lists,config.defaultSubject)
@@ -217,7 +272,24 @@ async function startTodo() {
     previousFilename=undefined // on purpose, also disable back button
     $("#backBTN").prop("disabled",true);
     DEBUG && console.log("loading: "+currentFilename)
-    arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
+    //arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
+
+    arrayOfContent=await loadList('items/'+currentFilename)
+    // var allContent=await ajaxGetJSON('items/'+currentFilename)
+    // if(Array.isArray(allContent)) {
+    //     arrayOfContent=allContent;
+    // } else {
+    //     arrayOfContent=allContent.list;
+    //     //<div id="titleDiv" style="display:none">Title: not implemented</div>
+    //     if(allContent.title!=undefined) {
+    //         $("#titleDiv").show();
+    //         $("#titleDiv").html(allContent.title)
+           
+    //         console.log("setting title to "+allContent.title)
+    //     }
+    // }
+
+
 
 	//render it
 	render();
@@ -257,15 +329,19 @@ function addIt() {
 }
 
 function showAdd() {
-
     $("#addDiv").toggle()
-
 }
 
+function calcNewHREF() {
+    return window.location.origin+"/?subject="+lists[$('#'+subject_list_selector).val()].subject+"&item="+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()];
+}
 
-define(["jquery", "utils"], function($) {
-    //the jquery.alpha.js and jquery.beta.js plugins have been loaded.
-    $(function() {
-        startTodo()
-    });
-});
+function copyLink() {
+    console.log(window.location)
+    console.log("current item="+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
+    console.log("current subject="+lists[$('#'+subject_list_selector).val()].subject);
+    //copyToClipBoard("something?subject="+lists[$('#'+subject_list_selector).val()].subject+"&item="+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()])
+    console.log("new href="+calcNewHREF())
+    copyToClipBoard(calcNewHREF())
+}
+

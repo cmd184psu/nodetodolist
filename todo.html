@@ -12,21 +12,48 @@
 	<link rel='stylesheet' href='css/fontawall.css' />
 	<link rel="shortcut icon" href="images/fvw.png" type="image/x-icon" />
 
-	<script data-main="js/todo" src="js/lib/require.js"></script>
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery-ui.js"></script>
+
+	<script src="js/utils.js"></script>
+	<script src="js/todo-utils.js"></script>
+	<script src="js/todo.js"></script>
+	<script>
+		$( document ).ready(function() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const entries = urlParams.entries();
+			// build params object
+			const params = {};
+			for (entry of entries) {
+				params[entry[0]] = entry[1];
+			}
+			console.log(params);
+    		startTodo(params)
+		}); //end doc ready function
+	</script>
 </head>
 
 <body>
-	<strong>Vote!</strong>
-	<div id="titleDiv" style="display:none">Title: not implemented</div>
+	<!--<strong>Vote!</strong>-->
+	<div id="titleDiv" style="display:none;  text-align: center; font-weight: bold;
+	font-size: 2em;">Title: not implemented</div>
 	<div id="loadedSubject">Subject: <select id="subject-list-selector" onchange="changeSubject()"></select></div>
 	<div id="loadedList">List: <select id="item-list-selector" onchange="changeItem()"></select></div>
-	<div><button id="backBTN" onclick="revertList()">Go Back</button></div>
+	<BR />
+	<table><tr><td>
+		<div><button id="backBTN" onclick="revertList()">Go Back</button></div>
+	</td><td>
+		<div><button id="copyLink" onclick="copyLink()">Copy Link To Clipboard <i class="far fa-copy"></i></button></div>
+	</td><td>
+		<button class="btn btn-success" onclick="window.open(calcNewHREF(),'_blank')">Open in New Tab <i class="fas fa-external-link-alt"></i></button>
+	</td></tr></table>
 	<!-- Total Vote Count: <input type=text id="voteCount" value="100" /><BR>-->
 	<table id="thetable" border=1>
+	<BR />
 	</table>
 	<button onclick="vote()">Vote</button>
 	<button onclick="render()">Refresh Page</button>
-	<button id="saveButton" onclick="saveit()">Save</button>
+	<button id="saveButton" onclick="saveit(1)">Save</button>
 	<button id="addButton" onClick="showAdd()"><i class="fas fa-plus"></i></button>
 	<BR />
 	<HR>
@@ -50,5 +77,6 @@
 		</tr>
 	</table>
 	</div>
+	<div style="display:none" id="hiddentext"><input type="text" id="copytext" value="null"></div>
 </body>
 </html>
