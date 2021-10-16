@@ -52,7 +52,16 @@ app.use((req, res, next) => {
 });
 
 const BASE=process.env.BASE || '.';
-var config=JSON.parse(fs.readFileSync(BASE+'/data.json', 'utf8'));
+var config=[];
+
+try {
+	if (fs.existsSync(BASE+'/data.json')) {
+		config=JSON.parse(fs.readFileSync(BASE+'/data.json', 'utf8'));
+	}
+  } catch(err) {
+	console.error(err)
+  }
+
 
 function btoa(data) {
 	return Buffer.from(data).toString('base64');
@@ -71,9 +80,9 @@ function prettyPrint(req, res, content) {
 
 var flatdb=BASE+"/data.json";
 
-console.log("sending: "+flatdb);
+//console.log("sending: "+flatdb);
 app.get('/config', function(req, res) {
-	config=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
+	//config=JSON.parse(fs.readFileSync(flatdb, 'utf8'));
 	
 	var content=new Object
 	content.defaultSubject=config.defaultSubject || process.env.DEFAULTSUBJECT || "home"
@@ -81,6 +90,8 @@ app.get('/config', function(req, res) {
 	content.index=config.index || process.env.INDEX || "todo.html" //todo.html or slideshow.html
 	content.prefix=config.prefix || process.env.PREFIX || "lists" //list or nt
 	content.ext=config.ext || process.env.EXT || "json" //json or jpg
+
+    content.showAllPages=config.showAllPages
 
 	var di=config.defaultItem || process.env.DEFAULTITEM || ""
 
@@ -116,21 +127,21 @@ app.post('/config', function(req, res) {
 	console.log("content-type: "+headers['content-type'])
 	var filename=process.cwd()+"/data.json"
 
-	try {
-		if (!fs.existsSync(filename)) {
-			console.log("requested item: "+filename+" does not exist")
-			res.status(404).send({ error: 'invalid request' })
-			res.end();
-			return		  //file exists
-		}
+	// try {
+	// 	if (!fs.existsSync(filename)) {
+	// 		console.log("requested item: "+filename+" does not exist")
+	// 		res.status(404).send({ error: 'invalid request' })
+	// 		res.end();
+	// 		return		  //file exists
+	// 	}
 
-		//file exists, ok to continue
-	} catch(err) {
-		console.error(err)
-		res.status(500).send({ error: 'error checking file existence' })
-		res.end();
-		return
-	}
+	// 	//file exists, ok to continue
+	// } catch(err) {
+	// 	console.error(err)
+	// 	res.status(500).send({ error: 'error checking file existence' })
+	// 	res.end();
+	// 	return
+	// }
 
 	//don't need this, the content-type protects us (maybe?)
 	var body=undefined
@@ -212,9 +223,9 @@ function getAllItems(req,res) {
 	var unrestrictedAge=process.env.UNRESTRICTED;
 	var start_subject=process.env.START_SUBJECT;
 	var end_subject=process.env.END_SUBJECT;
-        var image_restricted_len=process.env.ITEMS_RESTRICTEDLEN;
+    var image_restricted_len=process.env.ITEMS_RESTRICTEDLEN;
 
-        if(start_subject==undefined) start_subject=0;
+    if(start_subject==undefined) start_subject=0;
 	if(end_subject==undefined) end_subject=subjects.length;
 
 
@@ -357,7 +368,10 @@ function ENVvaristrue(m) {
 }
 app.get("/*", function(req, res) {
 	var url=req.url;
-	
+	if(req.url.includes('?')) {
+	    url=req.url.split('?')[0];
+	}
+			
 	if(ENVvaristrue(process.env.STRICT) && (url.startsWith(process.env.PREFIX) || url.startsWith("/"+process.env.PREFIX))) {
 		console.log("REJECTED:"+url)
 		res.status(403).send({ error: 'Permission Denied' })
@@ -372,7 +386,7 @@ app.get("/*", function(req, res) {
 	}
 
 	var contentType="text/plain";	
-	if(req.url.toString()=="/") {
+	if(url.toString()=="/") {
 		url=index_html;
 		contentType="text/html";
 	} else if(url.endsWith(".js")){
