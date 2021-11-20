@@ -416,5 +416,5 @@ async function startMenuserver() {
         console.log("show splash")
         showPage('splash');
     }
-	render();
+	//render();
 }
