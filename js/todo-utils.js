@@ -254,6 +254,7 @@ function renderRow(i) {
 //    updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
     updown+="<td><span onclick=\"onHoldFlip("+i+")\"><i class=\"fas fa-hand-paper\"></i></td>";
     updown+="<td><span onclick=\"inProgressFlip("+i+")\"<i class=\"fas fa-play\"></i></td>";
+    updown+="<td><span onclick=\"editFlip("+i+")\"<i class=\"fas fa-edit\"></i></td>";
     updown+="<td>&nbsp;&nbsp;&nbsp;</td>";
     updown+="<td><span onclick=\"deleteit("+i+")\"><i class=\"fa fa-trash\"></i></td>";
     updown+="<td>"+trophy+"</td>";
@@ -273,22 +274,15 @@ function renderRow(i) {
         row+="<td>"+(i+1)+"</td>";
 
 
-        var prepend="";
-        var append="";
-        if(arrayOfContent[i].periodic!=undefined && arrayOfContent[i].periodic && isDueNow(arrayOfContent[i].nextDue)) {
-            prepend="<strong><b>";
-            append="</b></strong>";
-        }
         
-        if(arrayOfContent[i].json!=undefined) {
-            row+="<td>"+
-            prepend+arrayOfContent[i].name+append+" "+
-            "<a href=\"javascript:SaveAndLoad('"+arrayOfContent[i].json+"')\">"+
-            "<i class=\"fas fa-external-link-alt\"></i>"+
-            "</a></td>";
-        } else {
-            row+="<td>"+prepend+embedURL(arrayOfContent[i].name)+append+"</td>";
-        }
+        row+="<td><div id=nonediting"+i+">";
+        row+=renderItem(i)
+        
+        row+="</div><div id=editing"+i+" style=display:none><input text value=\""+arrayOfContent[i].name+"\" onkeydown=\"saveedit(this,"+i+")\" />"
+
+
+
+        row+="</div></td>"
     }
     
 
@@ -331,6 +325,7 @@ function renderRow(i) {
 
 
 function compare(e) {
+    if(!$("#dndEnable").is(':checked')) return; 
     var p=arrayOfContent[dragging]
     arrayOfContent.splice(dragging, 1)
     //insert globalData[dragging] in draggedOver's spot
@@ -346,11 +341,13 @@ function compare(e) {
   }
       
   function setDraggedOver(e) {
+    if(!$("#dndEnable").is(':checked')) return; 
     e.preventDefault();
     draggedOver = parseInt(e.target.parentNode.id.substr(4))
   }
   
   function setDragging(e) {
+      if(!$("#dndEnable").is(':checked')) return; 
     //list2 becomes 2, meaning that the 3rd row (index=2) is dragging right now
     dragging = e.target.id.substr(4)
   }
@@ -364,7 +361,12 @@ function genRow(i) {
 
 
       var item= arrayOfContent[i];
-      node.draggable = true
+
+
+
+
+      node.draggable = $("#dndEnable").is(':checked');
+      node.className="draggableRow"
       node.id="list"+item.idx
       
       if(arrayOfContent[i].onHold) node.style.backgroundColor = "pink"
@@ -682,6 +684,15 @@ function rebuildListSelector(s,l,desired) {
     DEBUG_LOCAL && console.log("val of "+s+": "+$('#'+s).val())
     
     $('#'+s).val(retIndex);
+
+
+    //-- clone id and set it -- START
+    //let p = document.getElementById(s)
+    //let p_prime = p.cloneNode(true)
+    //new-subject-list-selector
+    //document.getElementById("new-"+s).
+    
+
     return retIndex;
 }
 
@@ -743,3 +754,52 @@ function rebuildListSelector(s,l,desired) {
 
 //    return "<href=\""+url+"\" target=_>"+label+"</a>";
 // }
+
+
+function dndToggled() {
+    var rows = document.querySelectorAll(".draggableRow");
+    for(i=0; i<rows.length;i++) {
+        //console.log("disable draggable on row "+i+" "+rows[i].innerHTML)
+        rows[i].draggable=$("#dndEnable").is(':checked');
+    }
+}
+
+function editFlip(i) {
+    $("#nonediting"+i).toggle();
+    $("#editing"+i).toggle();
+}
+
+function saveedit(ele,i) {
+    if(event.key === 'Enter' ) {
+        //alert(ele.value+" i="+i);
+        arrayOfContent[i].name=ele.value;
+        $("#nonediting"+i).html(renderItem(i));
+        editFlip(i);
+        console.log("saving....")
+        saveit();
+    } else if(event.key === 'Escape') {
+        ele.value=arrayOfContent[i].name;
+        editFlip(i);
+
+    }
+
+}
+
+function renderItem(i,content) {
+    var content="";
+    var prepend="";
+    var append="";
+    if(arrayOfContent[i].periodic!=undefined && arrayOfContent[i].periodic && isDueNow(arrayOfContent[i].nextDue)) {
+        prepend="<strong><b>";
+        append="</b></strong>";
+    }
+    if(arrayOfContent[i].json!=undefined) {
+        content+=prepend+arrayOfContent[i].name+append+" "+
+        "<a href=\"javascript:SaveAndLoad('"+arrayOfContent[i].json+"')\">"+
+        "<i class=\"fas fa-external-link-alt\"></i>"+
+        "</a>";
+    } else {
+        content+=prepend+embedURL(arrayOfContent[i].name)+append;
+    }
+    return content;
+}

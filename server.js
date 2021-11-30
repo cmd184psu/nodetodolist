@@ -364,6 +364,79 @@ app.post('/items/:subject/:item',function(req,res) {
 	res.end();
 });
 
+app.post('/items/:subject/:item/:newsubject',function(req,res) {
+	console.log("app.post(/items/{subject}/{item}/{newsubject}")
+	const { headers } = req;
+
+	//if(headers['content-type']!="applicaiton/json" || 
+	if(req.params==undefined || req.params.subject==undefined || req.params.item==undefined) {
+		console.log("REJECTED: "+req.url+" with content-type "+headers['content-type'])
+		res.status(400).send({ error: 'Invalid Request' })
+		res.end();
+		return
+	}
+	console.log("content-type: "+headers['content-type'])
+	var filename=process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item
+
+	var new_filename=process.cwd()+"/"+process.env.PREFIX+"/"+req.params.newsubject+"/"+req.params.item
+
+
+console.log("move from old filename="+filename)
+console.log("move to new filename="+new_filename)
+
+	try {
+		if (!fs.existsSync(filename)) {
+			console.log("requested item: "+filename+" does not exist")
+			res.status(404).send({ error: 'invalid request' })
+			res.end();
+			return		  //file exists
+		}
+
+		//file exists, ok to continue
+	} catch(err) {
+		console.error(err)
+		res.status(500).send({ error: 'error checking file existence' })
+		res.end();
+		return
+	}
+
+
+
+
+	//don't need this, the content-type protects us (maybe?)
+	var body=undefined
+	try {
+		body=JSON.parse(JSON.stringify(req.body))
+	} catch(err) {
+		console.error(err)
+		res.status(405).send({ error: 'parse error: content is not json' })
+		res.end();
+		return	
+	}
+
+	console.log("About to write: "+filename)
+	console.log("==== begin content ====")
+	console.log(JSON.stringify(body,null,3))
+	console.log("====  end content  ====")
+	try{ 
+
+		fs.renameSync(filename,new_filename)
+//		body=fs.readFileSync(filename)
+//		fs.writeFileSync(new_filename, JSON.stringify(body,null,3));
+
+//		fs.unlinkSync(filename)
+		res.send({ msg: 'File '+filename+' renamed to '+new_filename+'.'})
+
+	} catch(err) {
+		if( err ) {
+			console.error( err );
+			res.status(400).send({ error: 'unable to write to file '+filename })
+			
+		}
+	}
+	res.end();
+});
+
 function ENVvaristrue(m) {
 	return m && (m.toString().trim().toLowerCase().startsWith('true'))
 }

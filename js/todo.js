@@ -5,6 +5,7 @@ var savebutton=false;
 
 const item_list_selector='item-list-selector'
 const subject_list_selector='subject-list-selector'
+const new_subject_list_selector='new-subject-list-selector'
 var currentFilename=undefined
 var previousFilename=undefined
 
@@ -263,6 +264,8 @@ async function startTodo(params) {
 	//render selectors
     DEBUG && console.log("config.defaultSubject="+config.defaultSubject)
     rebuildListSelector(subject_list_selector,lists,config.defaultSubject)
+
+    rebuildListSelector(new_subject_list_selector,lists,config.defaultSubject)
     
     DEBUG && console.log("config.defaultItem="+config.defaultItem)
 	rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,config.defaultItem)
@@ -345,3 +348,60 @@ function copyLink() {
     copyToClipBoard(calcNewHREF())
 }
 
+async function reloadUI(newsub, newfile) {
+    //before we select a new subject and item
+    lists=await ajaxGetJSON("items");
+    rebuildListSelector(subject_list_selector,lists,newsub)
+    rebuildListSelector(new_subject_list_selector,lists,newsub)
+    rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,newfile)
+    SelectNewSubject(newsub,newfile)
+}
+
+function moveListToNewSubject() {
+    var A=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]
+    var B=lists[$('#'+new_subject_list_selector).val()].subject;
+    console.log("want to move "+A+" to subject "+B);
+    
+    //app.post('/items/:subject/:item/:newsubject',function(req,res) {
+    console.log("POST /items/"+A+"/"+B);
+
+    $.ajax({
+        url: 'items/'+A+"/"+B,  //relative target route
+        type: 'post',  //method
+        dataType: 'json',  //type to receive... json
+        contentType: 'application/json', //contenttype to send
+        success: function (data) {
+           $('#saveButton').prop('disabled', false);
+           console.log("success in saving content for filename: "+this.url)
+           if(showsavealert || savebutton) {
+               alert(data.msg)
+               savebutton=false;
+           }
+
+           //trigger subject change
+
+
+           const listing=this.url.split('/')
+           console.log("splitting url="+this.url+" by /")
+           console.log("length is "+listing.length)
+//function SelectNewSubject(newsubject,newfile) {
+            console.log("SelectNewSubject(newsubject,newfile)")
+            console.log("SelectNewSubject("+listing[3]+","+listing[3]+"/"+listing[2]+")")
+
+            reloadUI(listing[3],listing[3]+"/"+listing[2])
+
+
+       },
+       //data: JSON.stringify(content), // content to send; has to be stringified, even though it's application/json
+       error: function(err){   //something bad happened and ajax is unhappy
+            console.log(JSON.stringify(err,null,3));
+            if(showsavealert) alert(err.responseJSON.error);
+       }
+
+   }).done(function(data) {
+       console.log("done");
+       //re-enable save button
+       $('#saveButton').prop('disabled', false);
+       
+   });   
+}
