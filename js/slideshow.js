@@ -200,6 +200,7 @@ console.log(jpgs[i].subject+" into c=#"+c)
 
 	$("#"+c).hide();
 	$( "#"+c ).empty();
+	const images=[];
 	for(var j=0; j<jpgs[i].entries.length; j++) {
 		var content_to_add_to_dom="<div class=\"mySlides fade\" id=\"subject_slide"+j+"\" style=\"display:none\">"+
 			"<div class=\"numbertext\">"+(j+1)+" / "+(jpgs[i].entries.length)+" "+jpgs[i].entries[j]+"</div>" +
@@ -207,8 +208,13 @@ console.log(jpgs[i].subject+" into c=#"+c)
 			 "</div>";
 		 //console.log("adding to dom: "+content_to_add_to_dom);      
 		$( "#"+c ).append( content_to_add_to_dom );
-		//slidecount++;
+		images.push(config.prefix+"/"+jpgs[i].entries[j])
+			//slidecount++;
 	}
+
+
+
+	$("#kbc").attr("images", images.join(' '))
 	$("#"+c).show();
 	fixRes();
 

@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
 	<title>NodeJS Powered Slideshow</title>
 	<link rel="stylesheet" href="css/jquery-ui.css" />
-	<!--<link rel="stylesheet" href="css/styles.css" />-->
 	<link rel="stylesheet" href="css/nav.css" />
 	<link rel="stylesheet" href="css/modal.css" />
 	<link rel="stylesheet" href="css/fontawsme.css" />
 	<link rel='stylesheet' href='css/fontawall.css' />
+	<link rel='stylesheet' href='css/kbc.css' />
 	<link rel="shortcut icon" href="images/fvw.png" type="image/x-icon" />
 
 	<script src="js/jquery.js"></script>
@@ -17,15 +17,41 @@
 
 	<script src="js/utils.js"></script>
 	<script src="js/slideshow.js"></script>
+	<!--<script src="js/kenburns.js"></script>-->
+	<script src="js/kbc.js"></script>
 	<script>
+		function kbcSwitchOver() {
+			console.log ( "it burns!" )
+            $("#regular_ss").hide();
+			$("#kburns_ss").show();
+		}
+		function escape() {
+                console.log("key pressed!")
+                $("#kburns_ss").hide();
+                $("#regular_ss").show();
+
+        }
 		$( document ).ready(function() {
+			document.onkeydown = function(evt) {
+				evt = evt || window.event;
+				var isEscape = false;
+				if ("key" in evt) {
+					isEscape = (evt.key === "Escape" || evt.key === "Esc");
+				} else {
+					isEscape = (evt.keyCode === 27);
+				}
+				if (isEscape) {
+					escape();
+				}
+			};
     		startSlideShow()
 		}); //end doc ready function
 	</script>
 </head>
 <body>
 		
-		
+<div id="regular_ss">
+
 <table>
 	<tr>
 		<td><button onclick="saveSubject()"><i class="fas fa-bookmark"></i></button></td>
@@ -62,6 +88,12 @@
 					<td>&nbsp;</td>
 					<td><button id="deleteSubjectBtn" onClick="deleteSubject()"><i class="fas fa-trash-alt"></i></button>
 					</td>
+					<td>&nbsp;</td>
+					<td><button id="kbcSubjectBtn" onClick="kbcSwitchOver()"><i class="fas fa-fire"></i>
+
+					</button>
+					</td>
+					
 					</tr>
 				</table>
 			</td>
@@ -81,9 +113,12 @@
 		  <span class="dot"></span> 
 		  <span class="dot"></span> 
 		</div>
-		
+	</div>		
+<div id="kburns_ss" style="display:none" tabindex="0" onclick="nextSubject()" onkeypress="escape()" ondblclick="escape()">
+		<!--            <ken-burns-carousel id="demo3" fade-duration="2000" slide-duration="5000" animation-direction="normal" call-back="setNewImages" -->
+					<ken-burns-carousel id="kbc" fade-duration="2000" slide-duration="5000" animation-direction="normal"
+					images=""></ken-burns-carousel>
+		  
+</div>		
 </body>
-
-
-</script>
 </html>

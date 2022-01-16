@@ -94,6 +94,8 @@ app.get('/config', function(req, res) {
 
     content.showAllPages=config.showAllPages
 
+	content.kenburns=config.kenburns || process.env.KENBURNS;
+
 	var di=config.defaultItem || process.env.DEFAULTITEM || ""
 
 	//if config and env have nothing for defaultsubject, we need to infer from defaultitem
@@ -236,7 +238,7 @@ function getAllItems(req,res) {
 	var end_subject=process.env.END_SUBJECT;
     var image_restricted_len=process.env.ITEMS_RESTRICTEDLEN;
 	var shuffleSubjects=process.env.SHUFFLE;
-
+	
     if(start_subject==undefined) start_subject=0;
 	if(end_subject==undefined) end_subject=subjects.length;
 
