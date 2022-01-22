@@ -24,11 +24,25 @@
 			console.log ( "it burns!" )
             $("#regular_ss").hide();
 			$("#kburns_ss").show();
+			$("#kbc").attr("animation-direction", "once")
+
+			console.log ( "want to set delay to " + $("#delay").val() + " seconds." )
+			console.log ( "slide-duration: " + $("#kbc").attr("slide-duration") )
+			console.log ( "fade-duration: " + $("#kbc").attr("fade-duration") )
+
+			var sd=Number( $("#delay").val() ) * 1000;
+			var fd=sd/5*1;
+			console.log( " want to set slide-duration to "+sd)
+			console.log( " want to set fade-duration to "+fd)
+
+			$("#kbc").attr( "slide-duration", sd)  //5000
+			$("#kbc").attr( "fade-duration", fd)   //2000
 		}
 		function escape() {
                 console.log("key pressed!")
                 $("#kburns_ss").hide();
                 $("#regular_ss").show();
+				$("#kbc").attr("animation-direction", "pause")
 
         }
 		$( document ).ready(function() {
@@ -116,7 +130,7 @@
 	</div>		
 <div id="kburns_ss" style="display:none" tabindex="0" onclick="nextSubject()" onkeypress="escape()" ondblclick="escape()">
 		<!--            <ken-burns-carousel id="demo3" fade-duration="2000" slide-duration="5000" animation-direction="normal" call-back="setNewImages" -->
-					<ken-burns-carousel id="kbc" fade-duration="2000" slide-duration="5000" animation-direction="once" call-back="nextSubject"
+					<ken-burns-carousel id="kbc" fade-duration="2000" slide-duration="5000" animation-direction="pause" call-back="nextSubject"
 					images=""></ken-burns-carousel>
 		  
 </div>		
