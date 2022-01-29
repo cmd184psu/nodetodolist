@@ -26,6 +26,9 @@
 			$("#kburns_ss").show();
 			$("#kbc").attr("animation-direction", "once")
 
+			prevSubject();
+			nextSubject();
+
 			console.log ( "want to set delay to " + $("#delay").val() + " seconds." )
 			console.log ( "slide-duration: " + $("#kbc").attr("slide-duration") )
 			console.log ( "fade-duration: " + $("#kbc").attr("fade-duration") )
@@ -37,6 +40,7 @@
 
 			$("#kbc").attr( "slide-duration", sd)  //5000
 			$("#kbc").attr( "fade-duration", fd)   //2000
+			$("#kbc").attr("call-back", "nextSubject" );
 		}
 		function escape() {
                 console.log("key pressed!")

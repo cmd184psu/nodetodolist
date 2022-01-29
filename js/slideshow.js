@@ -212,9 +212,11 @@ console.log(jpgs[i].subject+" into c=#"+c)
 			//slidecount++;
 	}
 
-
-
+//	console.log ( "images were: " + $("#kbc").attr("images") )
+//	$("#kbc").attr("images","");
+//	console.log ( "images now (1): " + $("#kbc").attr("images") )
 	$("#kbc").attr("images", images.join(' '))
+//	console.log ( "images now (2): " + $("#kbc").attr("images") )
 	$("#"+c).show();
 	fixRes();
 
