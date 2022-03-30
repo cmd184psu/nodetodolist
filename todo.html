@@ -10,11 +10,12 @@
 	<link rel="stylesheet" href="css/modal.css" />
 	<link rel="stylesheet" href="css/fontawsme.css" />
 	<link rel='stylesheet' href='css/fontawall.css' />
+	<link rel="stylesheet" href="css/progress.css" />
 	<link rel="shortcut icon" href="images/fvw.png" type="image/x-icon" />
 
 	<script src="js/jquery.js"></script>
 	<script src="js/jquery-ui.js"></script>
-
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 	<script src="js/utils.js"></script>
 	<script src="js/todo-utils.js"></script>
 	<script src="js/todo.js"></script>
@@ -64,6 +65,24 @@
 	<button id="saveButton" onclick="saveit(1)">Save</button>
 	<button id="addButton" onClick="showAdd()"><i class="fas fa-plus"></i></button>
 	<BR />
+	<BR />
+	<div>
+		Progress:
+		<div class="progress">
+			<div id="pb_complete" class="progress-bar progress-bar-completed" role="progressbar" style="width:0%">
+			  Completed 0%
+			</div>
+			<div id="pb_inprogress" class="progress-bar progress-bar-inprogress" role="progressbar" style="width:0%">
+			  In Progress 0%
+			</div>
+			<div id="pb_blocked" class="progress-bar progress-bar-blocked" role="progressbar" style="width:0%">
+			  Blocked 0%
+			</div>
+		  </div>
+	</div>
+
+
+	</table>
 	<HR>
 	<BR />
 	<div id="addDiv" style="display:none">
