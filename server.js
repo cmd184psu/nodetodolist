@@ -79,6 +79,7 @@ function prettyPrint(req, res, content) {
 }
 
 var flatdb=BASE+"/data.json";
+var vmdb=BASE+"/vm.json";
 
 //console.log("sending: "+flatdb);
 app.get('/config', function(req, res) {
@@ -208,6 +209,70 @@ app.get('/subjects/:subject',function(req,res) {
 	}
 	res.end();
 })
+
+function isNumber(val){
+    return Number(val).toString()==val;
+	//eof val==='number' && !isNaN(val);
+}
+
+//serve out next vm config
+app.get('/vmconfig/:thisvm',function(req,res) {
+//	var exitvalue=0
+	if (fs.existsSync(vmdb)) {
+		var vms_config=JSON.parse(fs.readFileSync(vmdb, 'utf8'));
+		console.log("/vmconfig/"+req.params.thisvm)
+		console.log("/vmconfig/"+isNumber(req.params.thisvm))
+		if(req.params.thisvm!=undefined && isNumber(req.params.thisvm) && Number(req.params.thisvm)<vms_config.length) {
+			console.log("/vmconfig/"+req.params.thisvm)
+			prettyPrint(req,res,vms_config[req.params.thisvm])
+		} else {
+			console.log("/vmconfig (next available)")
+			for(var i=0; i<vms_config.length; i++) {
+				if(!vms_config[i].taken) {
+					prettyPrint(req,res,vms_config[i])
+					break;
+				}
+			}
+		}
+	} else {
+		console.log("err: Unable to read from file: "+vmdb)
+		prettyPrint(req,res,{})
+	}
+	res.end();		
+
+})
+
+app.post('/vmconfig/:thisvm', function(req, res) {
+	console.log("writing file!");
+	if (fs.existsSync(vmdb)) {
+		var vms_config=JSON.parse(fs.readFileSync(vmdb, 'utf8'));
+		console.log("/vmconfig/"+req.params.thisvm)
+		console.log("/vmconfig/"+isNumber(req.params.thisvm))
+		if(req.params.thisvm!=undefined && isNumber(req.params.thisvm) && Number(req.params.thisvm)<vms_config.length) {
+			console.log("[POST] /vmconfig/"+req.params.thisvm)
+			vms_config[req.params.thisvm].taken=true
+			//write the file to vmdb
+			console.log("====  end content  ====")
+			try{ 
+				fs.writeFileSync(vmdb,JSON.stringify(vms_config,null,3));
+				//fs.writeFileSync(filename, JSON.stringify(body,null,3));
+				res.send({ msg: 'File '+vmdb+' written successfully.'})
+			} catch(err) {
+				if( err ) {
+					console.error( err );
+					res.status(400).send({ error: 'unable to write to file '+vmdb })
+					
+				}
+			}
+		}
+		//prettyPrint(req,res,vms_config)
+	} else {
+		console.log("err: Unable to read from file: "+vmdb)
+		//prettyPrint(req,res,{})
+	}
+	
+	res.end();
+});
 
 function shuffle(sourceArray) {
     for (var i = 0; i < sourceArray.length - 1; i++) {
