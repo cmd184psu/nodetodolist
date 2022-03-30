@@ -73,7 +73,7 @@ rpms:
 	mv -vf $(RPMTOP)/SRPMS/$(NAME)-* .
 
 install-service:
-	sudo install -m 755 $(SERVICENAME).service /lib/systemd/system/
+	sudo install -m 755 servicefiles/$(SERVICENAME).service /lib/systemd/system/
 	sudo systemctl daemon-reload
 	sudo systemctl enable $(SERVICENAME)
 	sudo systemctl start $(SERVICENAME)
