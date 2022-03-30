@@ -94,6 +94,8 @@ app.get('/config', function(req, res) {
 
     content.showAllPages=config.showAllPages
 
+	content.kenburns=config.kenburns || process.env.KENBURNS;
+
 	var di=config.defaultItem || process.env.DEFAULTITEM || ""
 
 	//if config and env have nothing for defaultsubject, we need to infer from defaultitem
@@ -207,6 +209,16 @@ app.get('/subjects/:subject',function(req,res) {
 	res.end();
 })
 
+function shuffle(sourceArray) {
+    for (var i = 0; i < sourceArray.length - 1; i++) {
+        var j = i + Math.floor(Math.random() * (sourceArray.length - i));
+
+        var temp = sourceArray[j];
+        sourceArray[j] = sourceArray[i];
+        sourceArray[i] = temp;
+    }
+    return sourceArray;
+}
 
 function getAllItems(req,res) {
 	var rootdir=process.env.PREFIX || 'lists'
@@ -225,7 +237,8 @@ function getAllItems(req,res) {
 	var start_subject=process.env.START_SUBJECT;
 	var end_subject=process.env.END_SUBJECT;
     var image_restricted_len=process.env.ITEMS_RESTRICTEDLEN;
-
+	var shuffleSubjects=process.env.SHUFFLE;
+	
     if(start_subject==undefined) start_subject=0;
 	if(end_subject==undefined) end_subject=subjects.length;
 
@@ -273,7 +286,13 @@ function getAllItems(req,res) {
 		}
 		}
 	}
-	prettyPrint(req,res,dirlist)
+	if(shuffleSubjects) {	
+		prettyPrint(req,res,shuffle(dirlist))
+	} else {
+		prettyPrint(req,res,dirlist)
+	}
+
+	
 	if(configchange) {
 		console.log("need to save changes")
 	} 

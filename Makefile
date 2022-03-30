@@ -72,11 +72,16 @@ rpms:
 	mv -vf $(RPMTOP)/RPMS/noarch/$(NAME)-* .
 	mv -vf $(RPMTOP)/SRPMS/$(NAME)-* .
 
-install-service:
-	sudo install -m 755 servicefiles/$(SERVICENAME).service /lib/systemd/system/
+install-slideshow:
+	sudo install -m 755 servicefiles/slideshow.service /lib/systemd/system/
 	sudo systemctl daemon-reload
-	sudo systemctl enable $(SERVICENAME)
-	sudo systemctl start $(SERVICENAME)
+	sudo systemctl enable slideshow
+	sudo systemctl start slideshow
+install-todolist:
+	sudo install -m 755 servicefiles/todolist.service /lib/systemd/system/
+	sudo systemctl daemon-reload
+	sudo systemctl enable todolist
+	sudo systemctl start todolist
 
 docker-build:
 

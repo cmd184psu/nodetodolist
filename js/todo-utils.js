@@ -539,7 +539,16 @@ function vote() {
 //render currently loaded content
 //also demonstrates how to use QUIET_LOCAL vs DEBUG_UTILS correctly
 
+function setBar(id,text,val) {
+    //setBar("pb_complete","Completed",Math.round(completedCount*100/arrayOfContent.length))
+    $("#"+id).css("width",val+"%")
+    $("#"+id).html(text+" "+val+"%")
+}
+
 function render() {
+    var blockedCount=0
+    var completedCount=0
+    var inprogressCount=0
     reIndex();
     var QUIET_LOCAL=true
 
@@ -589,6 +598,9 @@ function render() {
 		} else {
 			QUIET_LOCAL || console.log("==>"+i+"th does not expire");
 		}
+        if(arrayOfContent[i].onHold) blockedCount++
+        if(arrayOfContent[i].inProgress) inprogressCount++
+        if(arrayOfContent[i].skip) completedCount++
     }
 
     //content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td colspan=3>=====</td></tr>";
@@ -596,10 +608,9 @@ function render() {
     t.appendChild(genTableFooter([ null, null,null, { "text" : "Totals" }, { "text" : TotalVotes(arrayOfContent) }, { "text" : "=====", "colSpan" : 3 }]))
 
 
-    //temporarily, don't draw the table
-    //document.getElementById(globalEL).innerHTML=content;
-
-
+    setBar("pb_complete","Completed",Math.round(completedCount*100/arrayOfContent.length))
+    setBar("pb_inprogress","In Progress",Math.round(inprogressCount*100/arrayOfContent.length))
+    setBar("pb_blocked","Blocked",Math.round(blockedCount*100/arrayOfContent.length))
 
     // for cooldown
     var now=new Date();
