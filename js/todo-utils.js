@@ -543,6 +543,7 @@ function setBar(id,text,val) {
     //setBar("pb_complete","Completed",Math.round(completedCount*100/arrayOfContent.length))
     $("#"+id).css("width",val+"%")
     $("#"+id).html(text+" "+val+"%")
+    console.log("setting id "+id+" to "+text+" "+val+"%")
 }
 
 function render() {
@@ -599,8 +600,8 @@ function render() {
 			QUIET_LOCAL || console.log("==>"+i+"th does not expire");
 		}
         if(arrayOfContent[i].onHold) blockedCount++
-        if(arrayOfContent[i].inProgress) inprogressCount++
-        if(arrayOfContent[i].skip) completedCount++
+        else if(arrayOfContent[i].inProgress && !arrayOfContent[i].skip) inprogressCount++
+        else if(arrayOfContent[i].skip) completedCount++
     }
 
     //content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td colspan=3>=====</td></tr>";
