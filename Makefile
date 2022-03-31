@@ -3,7 +3,7 @@ VER=1.0.0
 NAME=NodeJS-Todolist
 PNAME=$(NAME)-$(VER)
 BASE=/opt/NodeJS-Todolist
-SERVICENAME=todo
+SERVICENAME=vmregister
 
 
 all:
@@ -82,6 +82,11 @@ install-todolist:
 	sudo systemctl daemon-reload
 	sudo systemctl enable todolist
 	sudo systemctl start todolist
+install-vmregister:
+	sudo install -m 755 servicefiles/vmregister.service /lib/systemd/system/
+	sudo systemctl daemon-reload
+	sudo systemctl enable vmregister
+	sudo systemctl start vmregister
 
 docker-build:
 
