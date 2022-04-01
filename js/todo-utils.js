@@ -106,6 +106,8 @@ function TotalVotes(list) {
 
 function skipit(i) {
     arrayOfContent[i].skip=true;
+    arrayOfContent[i].onHold=false
+    arrayOfContent[i].inProgress=false
     render();
     saveit();
 }
