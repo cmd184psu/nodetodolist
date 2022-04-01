@@ -243,8 +243,8 @@ function renderRow(i) {
     
     //if(arrayOfContent[i].onHold) updown+="<tr bgcolor=pink>";
     //else 
-    updown+="<tr>";
 
+    updown+='<tr>';
     //if(arrayOfContent[i].onHold) trbit="<tr bgcolor=pink>";
     //else  if(arrayOfContent[i].inProgress) trbit="<tr bgcolor=lightgreen>";
     //else trbit="<tr>";
@@ -366,7 +366,15 @@ function genRow(i) {
 
 
       node.draggable = $("#dndEnable").is(':checked');
-      node.className="draggableRow"
+
+
+
+    if(arrayOfContent[i].skip) {
+        node.className="draggableRow completeClass"
+    } else {
+        node.className="draggableRow"
+    }
+      
       node.id="list"+item.idx
       
       if(arrayOfContent[i].onHold) node.style.backgroundColor = "pink"

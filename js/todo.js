@@ -405,3 +405,9 @@ function moveListToNewSubject() {
        
    });   
 }
+
+function hideShowCompleted() {
+    console.log("hide/show")
+
+    $(".completeClass").toggle()
+}
