@@ -254,12 +254,19 @@ function renderRow(i) {
 // up / down deprecated ;  gripit not needed
     //    updown+="<td><span onclick=\"gripIt("+i+")\"><i class=\"fas fas fa-grip-lines\"></i></span></td>";
 //    updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
-    updown+="<td><span onclick=\"onHoldFlip("+i+")\"><i class=\"fas fa-hand-paper\"></i></td>";
-    updown+="<td><span onclick=\"inProgressFlip("+i+")\"<i class=\"fas fa-play\"></i></td>";
-    updown+="<td><span onclick=\"editFlip("+i+")\"<i class=\"fas fa-edit\"></i></td>";
-    updown+="<td>&nbsp;&nbsp;&nbsp;</td>";
+
     updown+="<td><span onclick=\"deleteit("+i+")\"><i class=\"fa fa-trash\"></i></td>";
-    updown+="<td>"+trophy+"</td>";
+
+    if(arrayOfContent[i].skip) {
+        updown+="<td colspan=5></td>";
+    } else {
+        updown+="<td>&nbsp;&nbsp;&nbsp;</td>";
+        updown+="<td><span onclick=\"onHoldFlip("+i+")\"><i class=\"fas fa-hand-paper\"></i></td>";
+        updown+="<td><span onclick=\"inProgressFlip("+i+")\"<i class=\"fas fa-play\"></i></td>";
+        updown+="<td><span onclick=\"editFlip("+i+")\"<i class=\"fas fa-edit\"></i></td>";
+        updown+="<td>"+trophy+"</td>";
+    }
+
     updown+="</tr></table>";
 
 
@@ -557,6 +564,8 @@ function setBar(id,text,val) {
 }
 
 function render() {
+
+    var completeClassHidden=$(".completeClass").is(":hidden")
     var blockedCount=0
     var completedCount=0
     var inprogressCount=0
@@ -629,6 +638,11 @@ function render() {
     QUIET_LOCAL || console.log("==== "+(future.getUTCMilliseconds()-now.getUTCMilliseconds()));
     QUIET_LOCAL || console.log("now: "+formatedDate(now));
     QUIET_LOCAL || console.log("future: "+formatedDate(future));
+
+
+
+    if(completeClassHidden) $(".completeClass").hide()
+
 }
 
 function OLDrender() {
