@@ -229,6 +229,7 @@ app.get('/vmconfig/:thisvm',function(req,res) {
 			console.log("/vmconfig (next available)")
 			for(var i=0; i<vms_config.length; i++) {
 				if(!vms_config[i].taken) {
+					vms_config[i].idx=i
 					prettyPrint(req,res,vms_config[i])
 					break;
 				}
