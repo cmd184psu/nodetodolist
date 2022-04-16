@@ -556,10 +556,14 @@ function vote() {
 //render currently loaded content
 //also demonstrates how to use QUIET_LOCAL vs DEBUG_UTILS correctly
 
-function setBar(id,text,count,arraylength) {
+function setBar(id,text,count,arraylength,fillin) {
     //setBar("pb_complete","Completed",Math.round(completedCount*100/arrayOfContent.length))
     var val=Math.round(count*100/arraylength)
-    $("#"+id).css("width",val+"%")
+    if (fillin==undefined) { 
+        $("#"+id).css("width",val+"%")
+    } else {
+        $("#"+id).css("width",fillin+"%") 
+    }
     $("#"+id).html(text+" ("+count+"/"+arraylength+") "+val+"%")
     console.log("setting id "+id+" to "+text+" "+val+"% ("+count+"/"+arraylength+")")
 }
@@ -629,10 +633,20 @@ function render() {
     t.appendChild(genTableFooter([ null, null,null, { "text" : "Totals" }, { "text" : TotalVotes(arrayOfContent) }, { "text" : "=====", "colSpan" : 3 }]))
 
 
+
+
     setBar("pb_complete","Completed",completedCount,arrayOfContent.length) // Math.round(completedCount*100/arrayOfContent.length))
     setBar("pb_inprogress","In Progress",inprogressCount,arrayOfContent.length) //Math.round(inprogressCount*100/arrayOfContent.length))
     setBar("pb_blocked","Blocked",blockedCount,arrayOfContent.length)//Math.round(blockedCount*100/arrayOfContent.length))
-    setBar("pb_todo","Todo",arrayOfContent.length-blockedCount-inprogressCount-completedCount,arrayOfContent.length)//Math.round((arrayOfContent.length-blockedCount-inprogressCount-completedCount)*100/arrayOfContent.length))
+    setBar("pb_todo","Todo",
+        arrayOfContent.length-blockedCount-inprogressCount-completedCount,arrayOfContent.length,
+        100-(
+            Math.round((completedCount)*100/arrayOfContent.length) + 
+            Math.round((inprogressCount)*100/arrayOfContent.length) +
+            Math.round((blockedCount)*100/arrayOfContent.length)
+            ))
+    
+    //Math.round((arrayOfContent.length-blockedCount-inprogressCount-completedCount)*100/arrayOfContent.length))
 
     // for cooldown
     var now=new Date();
