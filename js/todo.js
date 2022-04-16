@@ -2,6 +2,7 @@ var config=new Object;
 var arrayOfContent=[];
 var lists=[]
 var savebutton=false;
+var countTimeoutDefault=300
 
 const item_list_selector='item-list-selector'
 const subject_list_selector='subject-list-selector'
@@ -15,6 +16,10 @@ const skipsave=false
 const restrictedsave=false
 const showsavealert=false
 //const BASE='lists/'
+
+function resetCounter() {
+    $("#staleCount").html(countTimeoutDefault)
+}
 
 function SaveList(content,filename,sb) {
     if(filename==undefined) {
@@ -240,6 +245,8 @@ function revertList() {
 
 
 async function startTodo(params) {
+    resetCounter()
+    reduceCountDown()
     //load /config into memory
 	config=await ajaxGetJSON("config/");
 
@@ -292,10 +299,23 @@ async function startTodo(params) {
     //     }
     // }
 
-
+    
 
 	//render it
 	render();
+    $(".completeClass").hide()
+}
+
+async function reduceCountDown() {
+    countTimeout=$("#staleCount").html()-1
+    $("#staleCount").html(countTimeout)
+    if (countTimeout==0) {
+        arrayOfContent=await loadList('items/'+currentFilename)
+        render()
+        $(".completeClass").hide()
+        alert("This instance has gone stale, reloading...")
+    } 
+    setTimeout(reduceCountDown,1000)
 }
 
 function addIt() {
