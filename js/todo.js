@@ -84,8 +84,6 @@ async function loadList(fn) {
         console.log("loadList("+fn+") returning just array with length = "+allContent.length)
         return allContent;
     }
-    // else {
-    //<div id="titleDiv" style="display:none">Title: not implemented</div>
     if(allContent.title!=undefined) {
         $("#titleDiv").show();
         $("#titleDiv").html(allContent.title)
@@ -285,22 +283,6 @@ async function startTodo(params) {
     //arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
 
     arrayOfContent=await loadList('items/'+currentFilename)
-    // var allContent=await ajaxGetJSON('items/'+currentFilename)
-    // if(Array.isArray(allContent)) {
-    //     arrayOfContent=allContent;
-    // } else {
-    //     arrayOfContent=allContent.list;
-    //     //<div id="titleDiv" style="display:none">Title: not implemented</div>
-    //     if(allContent.title!=undefined) {
-    //         $("#titleDiv").show();
-    //         $("#titleDiv").html(allContent.title)
-           
-    //         console.log("setting title to "+allContent.title)
-    //     }
-    // }
-
-    
-
 	//render it
 	render();
     $(".completeClass").hide()

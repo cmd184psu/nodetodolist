@@ -326,6 +326,9 @@ app.get('/items/:subject/:item',function(req,res) {
 	else if(process.env.EXT==".md") contentType='text/plain';
 
 
+	console.log("app.get():: sending file: "+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item)
+
+
 	sendFileContent(res, process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item, contentType);
 	//res.end();
 });
@@ -513,6 +516,13 @@ app.get("/*", function(req, res) {
 })
 
 function sortItems(sourceArray) {
+
+	if(sourceArray==undefined) return JSON.parse("[]")
+
+	if(sourceArray.list==undefined) {
+		console.log("ERR: unable to sort this")	
+		return sourceArray
+	}
 	var aaa= sourceArray.list.sort((a, b) => {
 		if (a.name.toLowerCase() < b.name.toLowerCase())
 		  return -1;

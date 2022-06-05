@@ -286,8 +286,15 @@ function renderRow(i) {
         
         row+="<td><div id=nonediting"+i+">";
         row+=renderItem(i)
+
+        var n=arrayOfContent[i].name
+        var j=arrayOfContent[i].json
+
+        if (j==undefined || j=="undefined") {
+            j=""
+        }
         
-        row+="</div><div id=editing"+i+" style=display:none><input text value=\""+arrayOfContent[i].name+"\" onkeydown=\"saveedit(this,"+i+")\" />"
+        row+="</div><div id=editing"+i+" style=display:none><input size=50 text value=\""+n+"\" onkeydown=\"saveeditName(this,"+i+")\" /><input size=50 text value=\""+j+"\" onkeydown=\"saveeditJSON(this,"+i+")\" />"
 
 
 
@@ -820,9 +827,10 @@ function editFlip(i) {
     $("#editing"+i).toggle();
 }
 
-function saveedit(ele,i) {
+function saveeditName(ele,i) {
     if(event.key === 'Enter' ) {
         //alert(ele.value+" i="+i);
+        console.log("set name to "+ele.value)
         arrayOfContent[i].name=ele.value;
         $("#nonediting"+i).html(renderItem(i));
         editFlip(i);
@@ -830,6 +838,26 @@ function saveedit(ele,i) {
         saveit();
     } else if(event.key === 'Escape') {
         ele.value=arrayOfContent[i].name;
+        editFlip(i);
+
+    }
+
+}
+function saveeditJSON(ele,i) {
+    if(event.key === 'Enter' ) {
+        //alert(ele.value+" i="+i);
+        console.log("set json to "+ele.value)
+        if(ele.value!=undefined) {
+            arrayOfContent[i].json=ele.value;
+        }
+        $("#nonediting"+i).html(renderItem(i));
+        editFlip(i);
+        console.log("saving....")
+        saveit();
+    } else if(event.key === 'Escape') {
+        if(arrayOfContent[i].json!=undefined) {
+            ele.value=arrayOfContent[i].json;
+        }
         editFlip(i);
 
     }
