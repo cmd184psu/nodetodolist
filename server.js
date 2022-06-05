@@ -111,6 +111,11 @@ app.get('/config', function(req, res) {
 	if(process.env.TODO!="" && process.env.TODO!=undefined) {
 		content.todo=(process.env.TODO=="true")
 	}
+
+	if(process.env.SORT!="") {
+		content.sortItems=true
+	}
+
 	prettyPrint(req,res,content)
 	res.end();
 });
@@ -209,7 +214,7 @@ app.get('/subjects/:subject',function(req,res) {
 	res.end();
 })
 
-function shuffle(sourceArray) {
+function shuffleItems(sourceArray) {
     for (var i = 0; i < sourceArray.length - 1; i++) {
         var j = i + Math.floor(Math.random() * (sourceArray.length - i));
 
@@ -238,6 +243,7 @@ function getAllItems(req,res) {
 	var end_subject=process.env.END_SUBJECT;
     var image_restricted_len=process.env.ITEMS_RESTRICTEDLEN;
 	var shuffleSubjects=process.env.SHUFFLE;
+	var sortSubjects=process.env.SORT;
 	
     if(start_subject==undefined) start_subject=0;
 	if(end_subject==undefined) end_subject=subjects.length;
@@ -287,7 +293,7 @@ function getAllItems(req,res) {
 		}
 	}
 	if(shuffleSubjects) {	
-		prettyPrint(req,res,shuffle(dirlist))
+		prettyPrint(req,res,shuffleItems(dirlist))
 	} else {
 		prettyPrint(req,res,dirlist)
 	}
@@ -506,6 +512,18 @@ app.get("/*", function(req, res) {
 	sendFileContent(res, process.cwd()+url, contentType);
 })
 
+function sortItems(sourceArray) {
+	var aaa= sourceArray.list.sort((a, b) => {
+		if (a.name.toLowerCase() < b.name.toLowerCase())
+		  return -1;
+		if (a.name.toLowerCase() > b.name.toLowerCase())
+		  return 1;
+		return 0;
+	})
+	sourceArray.list=aaa
+    return sourceArray;
+}
+
 function sendFileContent(response, fileName, contentType){
 	fs.readFile(fileName, function(err, data){
 		if(err){
@@ -514,7 +532,17 @@ function sendFileContent(response, fileName, contentType){
 		}
 		else{
 			response.writeHead(200, {'Content-Type': contentType});
-			response.write(data);
+			console.log("contentType="+contentType)
+			if (process.env.SORT!="" && contentType=="application/json") {
+				// console.log("========")
+				// console.log(JSON.parse(data))
+				// console.log("========")
+				// console.log(sortItems(JSON.parse(data)))
+				// console.log("========")
+				response.write(Buffer.from(JSON.stringify(sortItems(JSON.parse(data)))));
+			} else {
+				response.write(data);
+			}
 		}
 		response.end();
 	});
