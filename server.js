@@ -22,6 +22,7 @@ let path = require('path');
 const fs = require("fs");
 const https = require('https');
 const URL = require('url');
+const res = require("express/lib/response");
 
 
 app.use(express.static(path.join(__dirname, 'data')));
@@ -307,6 +308,91 @@ function getAllItems(req,res) {
 	res.end();
 }
 
+
+app.get('/getstate',function(req,res) {
+	// TURNON=rm
+	// FILESWITCH=HALTCELL
+	// TURNOFF=touch
+
+	if(
+		
+		process.env.TURNOFF==undefined || process.env.TURNON==undefined || process.env.FILESWITCH==undefined ||
+		process.env.TURNOFF=="" || process.env.TURNON=="" || process.env.FILESWITCH=="") {
+		res.status(400).send({ error: 'unable to determine state' })
+		res.sendStatus(404)
+		
+	}
+
+	console.log("fileswitch="+process.env.FILESWITCH)
+
+	var state=false
+	if(process.env.TURNOFF=="touch" && process.env.TURNON=="rm") {
+		state=!fs.existsSync(process.env.FILESWITCH)
+	} else if(process.env.TURNOFF=="rm" && process.env.TURNON=="touch") { 
+		state=fs.existsSync(process.env.FILESWITCH)
+	}	
+
+	res.send({ state: state})
+
+
+	res.end()
+})
+
+app.get('/togglestate',function(req,res) {
+	// TURNON=rm
+	// FILESWITCH=HALTCELL
+	// TURNOFF=touch
+
+	if(
+		
+		process.env.TURNOFF==undefined || process.env.TURNON==undefined || process.env.FILESWITCH==undefined ||
+		process.env.TURNOFF=="" || process.env.TURNON=="" || process.env.FILESWITCH=="") {
+		res.status(400).send({ error: 'unable to determine state' })
+		res.sendStatus(404)
+		
+	}
+	console.log("!!! TOGGLE !!!")
+	console.log("fileswitch="+process.env.FILESWITCH)
+
+	var state=false
+	if(process.env.TURNOFF=="touch" && process.env.TURNON=="rm") {
+		state=!fs.existsSync(process.env.FILESWITCH)
+
+		if(state) {
+			console.log("!!! TOUCH FILE: "+process.env.FILESWITCH)
+
+
+			fs.closeSync(fs.openSync(process.env.FILESWITCH, 'w'));
+		} else {
+			console.log("!!! rm FILE: "+process.env.FILESWITCH)
+
+			fs.unlinkSync(process.env.FILESWITCH)
+		}
+
+	} else if(process.env.TURNOFF=="rm" && process.env.TURNON=="touch") { 
+		state=fs.existsSync(process.env.FILESWITCH)
+
+		if(!state) {
+			console.log("!!! TOUCH FILE: "+process.env.FILESWITCH)
+
+			fs.closeSync(fs.openSync(process.env.FILESWITCH, 'w'));
+		} else {
+			console.log("!!! rm FILE: "+process.env.FILESWITCH)
+
+			fs.unlinkSync(process.env.FILESWITCH)
+		}
+
+	}	
+
+
+
+
+
+	res.send({ state: state})
+
+
+	res.end()
+})
 
 app.get('/items', function(req,res) { getAllItems(req,res) });
 
