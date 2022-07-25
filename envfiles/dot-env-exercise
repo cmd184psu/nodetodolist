@@ -1,0 +1,7 @@
+PORT=8700
+INDEX=/exercise.html
+# saving is not enabled yet
+AUTOSAVE=false
+# prevent web server from serving individual items
+STRICT=true
+UNRESTRICTED=true

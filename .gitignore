@@ -9,3 +9,6 @@ lists
 www-build
 menus
 lab-menus
+data
+.vscode
+.DS_Store
