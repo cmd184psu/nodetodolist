@@ -1,0 +1,15 @@
+[Unit]
+Description=Node Exercise
+After=network.target
+
+[Service]
+Environment=NODE_PATH=/usr/local/lib/nodejs/node-latest/lib/node_modules
+ExecStart=npm start
+WorkingDirectory=/opt/node/exercise
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=cdelezenski
+
+[Install]
+WantedBy=multi-user.target
