@@ -289,15 +289,23 @@ async function startTodo(params) {
 }
 
 async function reduceCountDown() {
-    countTimeout=$("#staleCount").html()-1
-    $("#staleCount").html(countTimeout)
-    if (countTimeout==0) {
-        arrayOfContent=await loadList('items/'+currentFilename)
-        render()
-        $(".completeClass").hide()
-        alert("This instance has gone stale, reloading...")
-    } 
-    setTimeout(reduceCountDown,1000)
+    if ($("#cntEnable").is(':checked')) {
+        if (isNaN($("#staleCount").html())) {
+            $("#staleCount").html(countTimeoutDefault)
+        }
+        countTimeout=$("#staleCount").html()-1
+        $("#staleCount").html(countTimeout)
+        if (countTimeout==0) {
+            arrayOfContent=await loadList('items/'+currentFilename)
+            render()
+            $(".completeClass").hide()
+            alert("This instance has gone stale, reloading...")
+            countTimeout=countTimeoutDefault
+        } 
+        setTimeout(reduceCountDown,1000)
+    } else {
+        $("#staleCount").html("n/a")
+    }
 }
 
 function addIt() {
