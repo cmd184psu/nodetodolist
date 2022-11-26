@@ -419,11 +419,46 @@ app.get('/items/:subject/:item',function(req,res) {
 	//res.end();
 });
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function thisDaysAgo(x) {
+  secondsago=x*86400
+  return Math.round(Date.now() / 1000) - secondsago;
+}
+
+function cleanMyList(dirty) {
+	var doneDirty=false;
+  for(let i=0; i<dirty.length; i++) {
+		if(dirty[i].skip && dirty[i].completedOn==null) {
+			dirty[i].completedOn=thisDaysAgo(getRandomInt(7))
+		}
+		if (dirty[i].completedOn<thisDaysAgo(7)) {
+			console.log("should delete "+i+" = "+dirty[i].name)
+			dirty[i]=null;
+			doneDirty=true
+		}
+	}
+  const clean=[];
+	if(doneDirty) {
+		console.log("do them dirty")
+		//delete body.list;
+		
+		for(let i=0; i<dirty.length; i++) {
+			if (dirty[i]!=null) {
+				clean.push(dirty[i]);
+			}
+		}
+		return clean;
+	}
+	return dirty;
+}
 
 app.post('/items/:subject/:item',function(req,res) {
 	console.log("app.post(/items/{subject}/{item}")
 	const { headers } = req;
-
+  var oldstyle=false
 	//if(headers['content-type']!="applicaiton/json" || 
 	if(req.params==undefined || req.params.subject==undefined || req.params.item==undefined) {
 		console.log("REJECTED: "+req.url+" with content-type "+headers['content-type'])
@@ -461,7 +496,23 @@ app.post('/items/:subject/:item',function(req,res) {
 		return	
 	}
 
+	console.log(JSON.stringify(body,null,3))
+  if(body.list==undefined) {
+		console.log("old style")
+		oldstyle=true
+	}
+  var cleanList
+	if(oldstyle) {
+		console.log(JSON.stringify(body,null,3))
+		cleanList=cleanMyList(body)
+		body=cleanList;
+	} else {
+	  console.log(JSON.stringify(body.list,null,3))
+		cleanList=cleanMyList(body.list)
+		body.list=cleanList;
+	}
 	console.log("About to write: "+filename)
+	console.log("==== deletion time correction ====")
 	console.log("==== begin content ====")
 	console.log(JSON.stringify(body,null,3))
 	console.log("====  end content  ====")

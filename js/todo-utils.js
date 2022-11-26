@@ -106,14 +106,16 @@ function TotalVotes(list) {
 
 function skipit(i) {
     arrayOfContent[i].skip=true;
-    arrayOfContent[i].onHold=false
-    arrayOfContent[i].inProgress=false
+    arrayOfContent[i].onHold=false;
+    arrayOfContent[i].inProgress=false;
+    arrayOfContent[i].completedOn=Math.round(Date.now() / 1000);
     render();
     saveit();
 }
 
 function dontskipit(i) {
     arrayOfContent[i].skip=false;
+    delete arrayOfContent[i].completedOn;
     render();
     saveit();
 }
