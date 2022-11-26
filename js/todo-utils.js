@@ -317,7 +317,9 @@ function renderRow(i) {
 	//period   - duration between due dates in days		
 
     // var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Ready?</th><th>Period (in days)</th><th>Next Due Date</th></tr>";
-    if(arrayOfContent[i].periodic==undefined || !arrayOfContent[i].periodic) {
+    if(arrayOfContent[i].skip) {
+        row+="<td></td><td>"+EpocMStoISODate(arrayOfContent[i].completedOn*1000)+"</td>";
+    } else if(arrayOfContent[i].periodic==undefined || !arrayOfContent[i].periodic) {
         row+="<td></td><td></td>";
     } else {
         var dueDate=new Date(arrayOfContent[i].nextDue);
