@@ -588,6 +588,7 @@ function render() {
     var blockedCount=0
     var completedCount=0
     var inprogressCount=0
+    var todoCount=0
     reIndex();
     var QUIET_LOCAL=true
 
@@ -640,11 +641,14 @@ function render() {
         if(arrayOfContent[i].onHold) blockedCount++
         else if(arrayOfContent[i].inProgress && !arrayOfContent[i].skip) inprogressCount++
         else if(arrayOfContent[i].skip) completedCount++
+        else todoCount++
     }
 
     //content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td colspan=3>=====</td></tr>";
     
-    t.appendChild(genTableFooter([ null, null,null, { "text" : "Totals" }, { "text" : TotalVotes(arrayOfContent) }, { "text" : "=====", "colSpan" : 3 }]))
+    vtotal=inprogressCount+todoCount
+
+    t.appendChild(genTableFooter([ null, null,{ "text" : vtotal }, { "text" : "Totals" }, { "text" : TotalVotes(arrayOfContent) }, { "text" : "=====", "colSpan" : 3 }]))
 
 
 
