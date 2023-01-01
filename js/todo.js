@@ -417,7 +417,12 @@ function moveListToNewSubject() {
 }
 
 function hideShowCompleted() {
-    console.log("hide/show")
+    console.log("hide/show [completed]")
 
     $(".completeClass").toggle()
+}
+function hideShowBlocked() {
+    console.log("hide/show [blocked]")
+
+    $(".blockedClass").toggle()
 }

@@ -391,6 +391,8 @@ function genRow(i) {
 
     if(arrayOfContent[i].skip) {
         node.className="draggableRow completeClass"
+    } else if(arrayOfContent[i].onHold) {
+        node.className="draggableRow blockedClass"
     } else {
         node.className="draggableRow"
     }
@@ -582,6 +584,7 @@ function setBar(id,text,count,arraylength,fillin) {
 function render() {
     resetCounter()
     var completeClassHidden=$(".completeClass").is(":hidden")
+    var blockedClassHidden=$(".blockedClass").is(":hidden")
     var blockedCount=0
     var completedCount=0
     var inprogressCount=0
@@ -669,6 +672,7 @@ function render() {
 
 
     if(completeClassHidden) $(".completeClass").hide()
+    if(blockedClassHidden) $(".blockedClass").hide()
 }
 
 function OLDrender() {
