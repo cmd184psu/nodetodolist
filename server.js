@@ -15,7 +15,11 @@
 require("dotenv").config();
 
 
-const express = require('express'), app = express(), port = process.env.PORT || 8000;
+const express = require('express')
+const cors = require('cors');
+const app = express()
+const port = process.env.PORT || 8443;
+app.use(cors());
 const bodyParser = require('body-parser');
 const  glob = require('glob')
 let path = require('path');  
@@ -24,7 +28,21 @@ const https = require('https');
 const URL = require('url');
 const res = require("express/lib/response");
 
+console.log("process.env.SECURE="+process.env.SECURE.toLowerCase())
 
+if(JSON.parse(process.env.SECURE.toLowerCase())) {
+	const httpsServer = https.createServer({
+		key: fs.readFileSync(process.env.KEY),
+		cert: fs.readFileSync(process.env.CERT),
+	}, app);
+	httpsServer.listen(port, () => {
+			console.log('HTTPS [SECURE] Server running on port '+port);
+	});
+} else {
+	app.listen(port);
+	console.log('HTTPS [NON-SECURE] Server running on port '+port);
+}
+console.log('(NodeJS Todolist/Slideshow engine) RESTful API server started on: ' + port);
 app.use(express.static(path.join(__dirname, 'data')));
 app.use(express.static('public'));
 app.use(bodyParser.json());
@@ -695,5 +713,3 @@ function sendFileContent(response, fileName, contentType){
 	});
 }
 
-app.listen(port);
-console.log('(NodeJS Todolist/Slideshow engine) RESTful API server started on: ' + port);
