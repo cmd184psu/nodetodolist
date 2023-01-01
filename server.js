@@ -28,9 +28,8 @@ const https = require('https');
 const URL = require('url');
 const res = require("express/lib/response");
 
-console.log("process.env.SECURE="+process.env.SECURE.toLowerCase())
 
-if(JSON.parse(process.env.SECURE.toLowerCase())) {
+if(process.env.SECURE!=undefined && JSON.parse(process.env.SECURE)) {
 	const httpsServer = https.createServer({
 		key: fs.readFileSync(process.env.KEY),
 		cert: fs.readFileSync(process.env.CERT),
