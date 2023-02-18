@@ -39,8 +39,15 @@ function SaveList(content,filename,sb) {
             return
         }
     }
+    console.log("roEnabled="+$("#roEnable").is(":checked"))
 
-    if(skipsave) {
+    if($("#roEnable").is(":checked")) {
+       console.log("r/o mode!")
+    } else {
+      console.log("r/w mode!")
+    }
+
+    if(skipsave || $("#roEnable").is(":checked")) {
         console.log("-- SKIPPING SAVE, for safety! --")    
         $('#saveButton').prop('disabled', false);
         return
@@ -265,6 +272,15 @@ async function startTodo(params) {
                 config.defaultItem=config.defaultSubject+"/"+params.item
             }
         }
+        if(params.readonly) {
+            $("#roEnable").prop('checked',true)
+            $("#saveButton").prop("disabled",true);
+            $("#addButton").prop("disabled",true);
+        } else {
+            $("#roEnable").prop('checked',false)
+            $("#saveButton").prop("disabled",false);
+            $("#addButton").prop("disabled",false);
+        }
     }
 	//render selectors
     DEBUG && console.log("config.defaultSubject="+config.defaultSubject)
@@ -346,7 +362,11 @@ function showAdd() {
 }
 
 function calcNewHREF() {
-    return window.location.origin+"/?subject="+lists[$('#'+subject_list_selector).val()].subject+"&item="+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()];
+
+  if($("#roEnable").is(":checked")) extra="&readonly=true";
+  else extra="";
+
+  return window.location.origin+"/?subject="+lists[$('#'+subject_list_selector).val()].subject+"&item="+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]+extra;
 }
 
 function copyLink() {

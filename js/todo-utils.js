@@ -121,17 +121,20 @@ function dontskipit(i) {
 }
 
 function deleteit(i) {
+    if($("#roEnable").is(":checked")) return;
     arrayOfContent.splice(i,1);  
     render();
     saveit();
 }
 
 function onHoldFlip(i) {
+    if($("#roEnable").is(":checked")) return;
     arrayOfContent[i].onHold=!arrayOfContent[i].onHold;
     render();
     saveit();
 }
 function inProgressFlip(i) {
+    if($("#roEnable").is(":checked")) return;
     arrayOfContent[i].inProgress=!arrayOfContent[i].inProgress;
     render();
     saveit();
@@ -256,12 +259,16 @@ function renderRow(i) {
 // up / down deprecated ;  gripit not needed
     //    updown+="<td><span onclick=\"gripIt("+i+")\"><i class=\"fas fas fa-grip-lines\"></i></span></td>";
 //    updown+="<td><span onclick=\"moveUp("+i+")\"><i class=\"fas fa-angle-double-up\"></i></span></td>";
-
-    updown+="<td><span onclick=\"deleteit("+i+")\"><i class=\"fa fa-trash\"></i></td>";
-
+    if (! $("#roEnable").is(":checked")) {
+      updown+="<td><span onclick=\"deleteit("+i+")\"><i class=\"fa fa-trash\"></i></td>";
+    } else {
+      updown+="<td></td>"
+    } 
     if(arrayOfContent[i].skip) {
         updown+="<td colspan=5></td>";
-    } else {
+    } else if ($("#roEnable").is(":checked")) {
+      updown+="<td colspan=5>"+trophy+"</td>";
+    } else {    
         updown+="<td>&nbsp;&nbsp;&nbsp;</td>";
         updown+="<td><span onclick=\"onHoldFlip("+i+")\"><i class=\"fas fa-hand-paper\"></i></td>";
         updown+="<td><span onclick=\"inProgressFlip("+i+")\"<i class=\"fas fa-play\"></i></td>";
@@ -833,6 +840,22 @@ function dndToggled() {
         rows[i].draggable=$("#dndEnable").is(':checked');
     }
 }
+
+function roToggled() {
+    // console.log("roEnabled is checked? "+$("#roEnable").is(':checked'))
+    // if($("#roEnable").is(':checked')) {
+    //   $("#roEnable").prop('checked',false)
+    // } else {
+    //   $("#roEnable").prop('checked',true)
+    // }
+    console.log("roEnabled is checked now?  "+$("#roEnable").is(':checked'))
+
+    //$("#roEnable").prop('checked',true)
+    $("#saveButton").prop("disabled",$("#roEnable").is(':checked'));
+    $("#addButton").prop("disabled",$("#roEnable").is(':checked'));
+
+}
+
 
 function editFlip(i) {
     $("#nonediting"+i).toggle();

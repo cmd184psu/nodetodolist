@@ -51,12 +51,15 @@
 		<button class="btn btn-success" onclick="window.open(calcNewHREF(),'_blank')">Open in New Tab <i class="fas fa-external-link-alt"></i></button>
 	</td></tr>
 
+	<tr><td><input type="checkbox" id="roEnable" name="roEnable" onclick="roToggled()">
+ <label for="roEnable">Read-only Mode Enabled</label></td></tr>
 	<tr><td><input type="checkbox" id="dndEnable" name="dndEnable"
 		checked onclick="dndToggled()">
  <label for="dndEnable">Drag and Drop Enabled</label></td></tr>
 		<tr><td>Stale Count:</td><td><div id="staleCount">300</div> seconds</td></tr>
 <tr><td><input type="checkbox" id="cntEnable" name="cntEnable"
 	 onclick="reduceCountDown()">
+
  <label for="countEnable">Stale Count Enabled</label></td></tr>
 
 	</table>
