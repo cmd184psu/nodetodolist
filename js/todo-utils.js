@@ -589,6 +589,22 @@ function setBar(id,text,count,arraylength,fillin) {
 }
 
 function render() {
+    $("#dndEnable").prop("disabled",false);
+    if($("#dndEnable").is(':checked') && $("#roEnable").is(':checked')) {
+      $("#dndEnable").prop('checked',false)
+      dndToggled()
+    }
+    //if(!$("#saveButton").is(':disabled')) {
+    $("#saveButton").prop("disabled",$("#roEnable").is(':checked'));
+    //}
+//    if(!$("#addButton").is(':disabled')) {
+    $("#addButton").prop("disabled",$("#roEnable").is(':checked'));
+//    }
+//    if(!$("#dndEnable").is(':disabled')) {
+    $("#dndEnable").prop("disabled",$("#roEnable").is(':checked'));
+
+//    }
+
     resetCounter()
     var completeClassHidden=$(".completeClass").is(":hidden")
     var blockedClassHidden=$(".blockedClass").is(":hidden")
@@ -851,9 +867,9 @@ function roToggled() {
     console.log("roEnabled is checked now?  "+$("#roEnable").is(':checked'))
 
     //$("#roEnable").prop('checked',true)
-    $("#saveButton").prop("disabled",$("#roEnable").is(':checked'));
-    $("#addButton").prop("disabled",$("#roEnable").is(':checked'));
 
+
+    render();
 }
 
 
