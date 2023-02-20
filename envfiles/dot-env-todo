@@ -1,3 +1,6 @@
+CLIENT_ID=JwBtsluXHEIr1uv4bdnD83oYmzrir1fA
+ISSUER_BASE_URL=https://dev-8fm67zjrpx1350q0.us.auth0.com
+SECRET='0c36cc8d-2d1a-495b-a870-eec48d904029'
 PORT=8000
 INDEX=/todo.html
 PREFIX=lists

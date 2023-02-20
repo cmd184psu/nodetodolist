@@ -18,15 +18,60 @@ require("dotenv").config();
 const express = require('express')
 const cors = require('cors');
 const app = express()
-const port = process.env.PORT || 8443;
 app.use(cors());
 const bodyParser = require('body-parser');
 const  glob = require('glob')
 let path = require('path');  
 const fs = require("fs");
 const https = require('https');
+const logger = require('morgan');
 const URL = require('url');
 const res = require("express/lib/response");
+const router = require('./routes/index');
+const { auth } = require('express-openid-connect');
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+app.use(logger('dev'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+
+const authconfig = {
+  authRequired: false,
+  auth0Logout: true
+};
+
+const port = process.env.PORT || 8443;
+if (!authconfig.baseURL && !process.env.BASE_URL && process.env.PORT && process.env.NODE_ENV !== 'production') {
+  authconfig.baseURL = `http://localhost:${port}`;
+}
+
+app.use(auth(authconfig));
+
+// Middleware to make the `user` object available for all views
+app.use(function (req, res, next) {
+  res.locals.user = req.oidc.user;
+  next();
+});
+
+app.use('/', router);
+
+// Catch 404 and forward to error handler
+// app.use(function (req, res, next) {
+//   const err = new Error('Not Found');
+//   err.status = 404;
+//   next(err);
+// });
+
+// Error handlers
+app.use(function (err, req, res, next) {
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: process.env.NODE_ENV !== 'production' ? err : {}
+  });
+});
 
 
 if(process.env.SECURE!=undefined && JSON.parse(process.env.SECURE)) {
