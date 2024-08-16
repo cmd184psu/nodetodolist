@@ -75,7 +75,7 @@
 		<td><button onclick="saveSubject()"><i class="fas fa-bookmark"></i></button></td>
 		<td>Subject: <select id="subject-selector" onchange="changeSubject()"></select></td>
   		<td>Delay in seconds: </td>
-  		<td><div class="slidecontainer"><input type="range" min="2" max="10" value="5" id="delay"></div></td>
+  		<td><div class="slidecontainer"><input type="range" min="2" max="10" value="7" id="delay"></div></td>
   		<td>Max Width: <div id="mw">2000</div></td>
   		<td><div class="slidecontainer"><input type="range" min="0" max="5" value="5" id="maxWidth" onchange="fixRes()"></div>px</td>
   		<td>Max Height: <div id="mh">800</div></td>
@@ -95,7 +95,7 @@
 					<button id="pauseBtn" onClick="pauseShow()" style="display:none"><i class="fas fa-pause"></i></button>
 					</td>
 					<td>
-					<button id="playBtn" onClick="playShow()"><i class="fas fa-play"></i></button>
+					<button id="playBtn" onClick="playShowAlt()"><i class="fas fa-play"></i></button>
 					</td>
 					<td>
 					<button id="forwardBtn" onClick="goForwards(true)"><i class="fas fa-forward"></i></button>
@@ -111,14 +111,13 @@
 
 					</button>
 					</td>
-					
 					</tr>
 				</table>
 			</td>
 		</tr>
 </table>
 	  
-		
+		<div id="msgbar" style="display:none"></div>
 		<div id="slideshow-container">
 		
 		</div>

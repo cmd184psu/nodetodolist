@@ -2,6 +2,10 @@ var slideIndex = 0;
 var element_to_hide= undefined
 var paused=true
 var jpgs=[]
+var counter=0;
+let cancelGoForwards=false;
+let scrollLock=false
+let goforwardlock=false
 
 const subject_selector = "subject-selector"
 
@@ -49,8 +53,23 @@ function goBackwards(pausestate) {
 }
 
 function goForwards(pausestate) {
+	if(goforwardlock) {
+		return
+	}
+	goforwardslock=true
+	if(scrollLock) {
+		console.log("goForwards blocked by scrollLock")
+		goforwardslock=false
+		return
+	}
 	if(pausestate!=undefined) paused=pausestate;
+	if(cancelGoForwards) {
+		cancelGoForwards=false
+		goforwardslock=false
+		return
+	}
 	showImage(slideIndex+1);
+	goforwardslock=false
 }
 
 function showImage(newslideIndex) {
@@ -70,6 +89,7 @@ function showImage(newslideIndex) {
 		slideIndex=0;
 		$('#'+subject_selector).val(Number(s))
 		loadCurrentSubject();
+		saveSubject()
 	}
 
 	if(slideIndex<0) {
@@ -107,7 +127,7 @@ function showImage(newslideIndex) {
 			throw error
 		}
 	} catch (err) {
-		console.error("what happened here?!?")
+		console.error("error:"+error)
 	}
 	element_to_hide=element_to_show
 	refreshDots();
@@ -123,6 +143,7 @@ function nextSubject() {
 	loadCurrentSubject();
 
 	showImage(0)
+	saveSubject()
 }
 
 function prevSubject() {
@@ -134,6 +155,7 @@ function prevSubject() {
 	$( '#'+subject_selector ).val(Number(s));
 	loadCurrentSubject();
 	showImage(0)
+	saveSubject()
 }
 
 function changeSubject() {
@@ -145,6 +167,7 @@ function changeSubject() {
 	$( '#'+subject_selector ).val(Number(s));
 	loadCurrentSubject();
 	showImage(0)
+	saveSubject()
 }
 
 function fixRes() {
@@ -157,6 +180,14 @@ function fixRes() {
 	$('.dimcontrol').css('max-width',$("#mw").html()+'px');
 	$('.dimcontrol').css('max-height',$("#mh").html()+'px');
 	console.log("fixRes: "+$("#mw").html()+" x "+$("#mh").html());
+}
+
+function sendMsg(m) {
+	$("#msgbar").html(m)
+	$("#msgbar").show()
+	
+	setTimeout(function() { $("#msgbar").html("")
+		  $("#msgbar").hide() }   ,10000)
 }
 
 function saveSubject() {
@@ -172,7 +203,7 @@ function saveSubject() {
         success: function (data) {
            $('#saveButton').prop('disabled', false);
            console.log("success in saving config")
-           alert(data.msg)
+           sendMsg(data.msg)
        },
        data: JSON.stringify(config), // content to send; has to be stringified, even though it's application/json
        error: function(err){   //something bad happened and ajax is unhappy
@@ -195,8 +226,16 @@ function deleteSubject() {
 
 //Load the ith subject into container c
 function loadSubject(i,c) {
+	var restartshow=false
+	if(!paused) {
+		restartshow=true
+		console.log("pausing show during load subject")
+		pauseShow()
+	}
+ 
+
 	console.log("loading subject i="+i+" which is ")
-console.log(jpgs[i].subject+" into c=#"+c)
+	console.log(jpgs[i].subject+" into c=#"+c)
 
 	$("#"+c).hide();
 	$( "#"+c ).empty();
@@ -204,7 +243,7 @@ console.log(jpgs[i].subject+" into c=#"+c)
 	for(var j=0; j<jpgs[i].entries.length; j++) {
 		var content_to_add_to_dom="<div class=\"mySlides fade\" id=\"subject_slide"+j+"\" style=\"display:none\">"+
 			"<div class=\"numbertext\">"+(j+1)+" / "+(jpgs[i].entries.length)+" "+jpgs[i].entries[j]+"</div>" +
-			 "<img src=\""+config.prefix+"/"+jpgs[i].entries[j]+"\" class=\"dimcontrol\" onclick=\"goForwards(true)\" ondblclick=\"nextSubject()\">" +
+			 "<img src=\""+config.prefix+"/"+jpgs[i].entries[j]+"\" class=\"dimcontrol\" onclick=\"onImageClick()\" id=\"subject_slide"+j+"_img\">" +
 			 "</div>";
 		 //console.log("adding to dom: "+content_to_add_to_dom);      
 		$( "#"+c ).append( content_to_add_to_dom );
@@ -219,7 +258,11 @@ console.log(jpgs[i].subject+" into c=#"+c)
 //	console.log ( "images now (2): " + $("#kbc").attr("images") )
 	$("#"+c).show();
 	fixRes();
-
+	
+	if(restartshow) {
+		console.log("restarting the show in 5 seconds")
+		setTimeout(function() { playShowAlt() },5000)
+	}
 }
 
 function loadCurrentSubject() { loadSubject($('#'+subject_selector).val(),'slideshow-container') }
@@ -272,4 +315,132 @@ async function startSlideShow() {
 	console.log("\tdefault subject is "+config.defaultSubject)
 	showImage(0)
 }
+let isAtBottom = false;
 
+function scrollBottomThenTop(duration = 2000) {
+	if (paused) return
+	if (scrollLock) {
+		console.log("timing error, someone tried to enter function too soon")
+		return
+	}
+	scrollLock=true
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+
+    function scrollTo(start, end, callback) {
+		if (paused) {
+			return
+		}
+        let startTime = null;
+        const distance = end - start;
+
+        function animation(currentTime) {
+			if(paused) {
+				return
+			}
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const run = ease(timeElapsed, start, distance, duration);
+            window.scrollTo(0, run);
+            if (timeElapsed < duration) {
+                requestAnimationFrame(animation);
+            } else {
+				if(paused) {
+					return
+				}
+                if (callback) setTimeout(callback, 500); // Wait half a second before scrolling back
+            }
+        }
+
+        function ease(t, b, c, d) {
+            t /= d / 2;
+            if (t < 1) return c / 2 * t * t + b;
+            t--;
+            return -c / 2 * (t * (t - 2) - 1) + b;
+        }
+		if(paused) {
+			return
+		}
+        requestAnimationFrame(animation);
+    }
+
+    // First, scroll to bottom
+    scrollTo(window.pageYOffset, scrollHeight - clientHeight, function() {
+		if(paused) return
+        // Then, scroll back to top
+        scrollTo(scrollHeight - clientHeight, 0);
+    });
+	scrollLock=false
+}
+
+
+function recurring_SelfScroll() {
+	if(paused) return;
+	//prep for scroll
+	console.log("prep for scroll")
+
+	el="subject_slide"+slideIndex+"_img"
+	console.log("subject_selector:="+el)
+	const img = document.getElementById(el);
+	img.style.width = '100%';
+	img.style.height = '100%';
+	img.style.maxHeight='4000px'
+	img.style.maxWidth='4000px'
+	img.style.top="100px"
+	isAtBottom = false;
+	//do the scroll down
+	console.log("scrolling down at delay: "+getDelay()+" and then back to the top")
+	scrollBottomThenTop(getDelay())
+
+	//go forwards
+	if(!paused) {
+		setTimeout(
+			function() {
+				console.log("go forwards")
+				if(paused) {
+					return
+				}
+				goForwards();
+				console.log("plant next round as timeout with delay: "+getDelay())
+
+				if(paused) {
+					return
+				}
+
+				recurring_SelfScroll()}
+				, getDelay()*2+1000); // Change image every 5 seconds
+		}
+}
+
+function playShowAlt() {
+	console.log("PLAY!");
+	document.getElementById("playBtn").style.display="none";
+	document.getElementById("pauseBtn").style.display="block";
+	//show current slide
+	//slideIndex--;
+	paused=false;
+	//recurring_goForwards();
+	recurring_SelfScroll();
+}
+
+function onImageClick() {
+	if(paused) {
+		goForwards()
+	} else {
+		pauseShow()
+		el="subject_slide"+slideIndex+"_img"
+		console.log("subject_selector:="+el)
+		const img = document.getElementById(el);
+		//fixRes()
+		img.style.width = '';
+		img.style.height = '';
+		img.style.maxHeight=''
+		img.style.maxWidth=''
+		img.style.top="100px"
+
+		fixRes()
+		cancelGoForwards=true
+//		max-width: 2000px; max-height: 800px;
+		isAtBottom = false;
+	}
+}
