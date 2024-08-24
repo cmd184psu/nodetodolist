@@ -33,9 +33,9 @@ const https = require('https');
 const logger = require('morgan');
 const URL = require('url');
 
-if (process.env.SECRET!=undefined) {
 const res = require("express/lib/response");
 const router = require('./routes/index');
+if (process.env.SECRET!=undefined) {
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
