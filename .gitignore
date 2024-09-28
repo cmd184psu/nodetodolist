@@ -12,3 +12,9 @@ lab-menus
 data
 .vscode
 .DS_Store
+
+*.crt
+*.key
+.DS_Store
+._.DS_Store
+*.conf
