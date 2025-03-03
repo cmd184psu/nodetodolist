@@ -1,3 +1,0 @@
-location /service/ {
-            proxy_pass http://localhost:port/;
-}

@@ -21,6 +21,7 @@
 	<script src="js/todo.js"></script>
 	<script>
 		$( document ).ready(function() {
+			console.log("Document Ready");
 			const urlParams = new URLSearchParams(window.location.search);
 			const entries = urlParams.entries();
 			// build params object
@@ -28,7 +29,9 @@
 			for (entry of entries) {
 				params[entry[0]] = entry[1];
 			}
+			console.log("about to list params")
 			console.log(params);
+			console.log("start todo")
     		startTodo(params)
 		}); //end doc ready function
 	</script>

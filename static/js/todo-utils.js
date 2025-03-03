@@ -385,17 +385,9 @@ function compare(e) {
 
 function genRow(i) {
     var node= document.createElement("tr");    
+    var item= arrayOfContent[i];
 
-
-      var item= arrayOfContent[i];
-
-
-
-
-      node.draggable = $("#dndEnable").is(':checked');
-
-
-
+    node.draggable = $("#dndEnable").is(':checked');
     if(arrayOfContent[i].skip) {
         node.className="draggableRow completeClass"
     } else if(arrayOfContent[i].onHold) {

@@ -10,6 +10,7 @@ function ajaxGet(uri) {
 }
 
 function ajaxGetJSON(uri) {
+    console.log("ajaxGetJSON("+uri+")")
     return new Promise((resolve, reject) => {
         fetch(uri).then(async (response)=> {
             resolve(await response.json())

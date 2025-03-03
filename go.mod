@@ -22,4 +22,3 @@ require (
 )
 
 replace github.com/cmd184psu/alfredo => ../alfredo
-

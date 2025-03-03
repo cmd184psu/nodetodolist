@@ -20,20 +20,6 @@ type SampleData struct {
 
 var jserver alfredo.JwtHttpsServerStruct
 
-type ConfigStruct struct {
-	Port           int    `json:"port"`
-	Index          string `json:"indexhtml"`
-	Prefix         string `json:"prefix"`
-	Ext            string `json:"ext"`
-	Todo           bool   `json:"todo"`
-	DefaultSubject string `json:"defaultSubject"`
-	Strict         bool   `json:"strict"`
-	Age            int    `json:"age"`
-	Unrestricted   bool   `json:"unrestricted"`
-	Secure         bool   `json:"secure"`
-}
-
-var config ConfigStruct
 
 // mux.HandleFunc("GET /api/tender/readWrite/{tenderReference}/vendor/{vendorCode}", func(w http.ResponseWriter, r *http.Request) {
 //     tenderRef := r.PathValue("tenderReference")
@@ -45,36 +31,60 @@ var config ConfigStruct
 //	    }
 //	    tender.readWrite()
 //	})
-func ServeJsonFile(f string, w http.ResponseWriter, r *http.Request) {
-	// Open the file
-	file, err := os.Open(f)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer file.Close()
+// func ServeJsonFile(f string, w http.ResponseWriter, r *http.Request) {
+// 	log.Printf("ServeJsonFile(%s)\n", f)
+// 	useInitialized := false
+// 	if !alfredo.FileExistsEasy(f) {
+// 		log.Printf("file %s does not exist\n", f)
+// 		if err := alfredo.Touch(f); err != nil {
+// 			log.Printf("error creating file %s\n", f)
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 		useInitialized = true
+// 	}
 
-	// Get file info
-	fileInfo, err := file.Stat()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+// 	if useInitialized {
+// 		log.Printf("using initialized file %s\n", f)
+// 		w.Header().Set("Content-Type", alfredo.ApplicationJson)
+// 		content := []byte("{ \"title\" : \"untitled\", \"list\": []")
+// 		log.Printf("content=%s\n", content)
+// 		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(content)))
+// 		w.WriteHeader(http.StatusOK)
+// 		w.Write(content)
+// 	} else {
 
-	// Set headers
-	//w.Header().Set("Content-Disposition", "attachment; filename="+fileInfo.Name())
-	w.Header().Set("Content-Type", alfredo.ApplicationJson)
-	w.Header().Set("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
+// 		// Open the file
+// 		file, err := os.Open(f)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 		defer file.Close()
 
-	// Copy file contents to response writer
-	_, err = io.Copy(w, file)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
+// 		// Get file info
+// 		fileInfo, err := file.Stat()
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
 
-func main() {
+// 		// Set headers
+// 		//w.Header().Set("Content-Disposition", "attachment; filename="+fileInfo.Name())
+// 		w.Header().Set("Content-Type", alfredo.ApplicationJson)
+// 		w.Header().Set("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
+// 		log.Printf("file=%s, size=%d\n", f, fileInfo.Size())
+// 		// Copy file contents to response writer
+// 		_, err = io.Copy(w, file)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 	}
+
+// }
+
+func Oldmain() {
 	if err := alfredo.ReadStructFromJSONFile("./config.json", &config); err != nil {
 		panic(err.Error())
 	}
@@ -87,11 +97,22 @@ func main() {
 	//handlers
 	jserver.Router.Post(alfredo.LoginRoute, loginHandler)
 	//	jserver.Router.Get("/data", jserver.AuthMiddleware(GetData))
-	jserver.Router.Get("/data", jserver.AuthMiddleware(GetData))
+	//jserver.Router.Get("/data", jserver.AuthMiddleware(GetData))
+
+	jserver.SetStaticDirRoute("/static")
 	jserver.Router.Get("/config/", GetConfig)
 	jserver.Router.Get("/config", GetConfig)
 
 	jserver.Router.Get("/items", config.GetItems)
+	jserver.Router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+
+		log.Printf("in / route")
+		log.Printf("URI=%s", r.RequestURI)
+
+		log.Printf("serving index file: %s\n", config.Index)
+
+		http.ServeFile(w, r, "./static/"+config.Index)
+	})
 	jserver.Router.Get("/items/{subject}/{item}", func(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("in complex /items/ route")
@@ -232,11 +253,11 @@ func GetData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(sampleData)
 }
 
-func GetConfig(w http.ResponseWriter, r *http.Request) {
-	log.Printf("calling GetConfig()")
-	w.Header().Set(alfredo.ContentTypeJSON())
-	json.NewEncoder(w).Encode(config)
-}
+// func GetConfig(w http.ResponseWriter, r *http.Request) {
+// 	log.Printf("calling GetConfig()")
+// 	w.Header().Set(alfredo.ContentTypeJSON())
+// 	json.NewEncoder(w).Encode(config)
+// }
 
 // [
 //   {
@@ -287,43 +308,3 @@ func GetConfig(w http.ResponseWriter, r *http.Request) {
 //     "age": 156.571041724537
 //   },
 
-type ListStruct struct {
-	Age       int      `json:"age"`
-	Timestamp int      `json:"timestamp"`
-	Subject   string   `json:"subject"`
-	Entries   []string `json:"entries"`
-}
-
-func (config *ConfigStruct) GetLists() []ListStruct {
-	//get list of directories
-	log.Printf("prefix=%s\n", config.Prefix)
-	thisdir, _ := os.Getwd()
-	os.Chdir(config.Prefix)
-	dirs := alfredo.FindFiles(".", "*", alfredo.DirectoryInodes)
-	//dirs = append(dirs, "coding")
-	//dirs = append(dirs, "work")
-	//dirs = append(dirs, "home")
-	var list []ListStruct
-	var l ListStruct
-	log.Printf("size of dirs: %d\n", len(dirs))
-	for d := 0; d < len(dirs); d++ {
-		if strings.EqualFold(dirs[d], ".") {
-			continue
-		}
-		log.Printf("looking at directory: dir[%d]=%q\n", d, dirs[d])
-		l.Age = 0
-		l.Timestamp = 0
-		l.Subject = dirs[d]
-		l.Entries = alfredo.FindFiles(l.Subject, "*.json", alfredo.RegFileInodes)
-
-		list = append(list, l)
-	}
-	os.Chdir(thisdir)
-
-	return list
-}
-
-func (config *ConfigStruct) GetItems(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set(alfredo.ContentTypeJSON())
-	json.NewEncoder(w).Encode(config.GetLists())
-}
