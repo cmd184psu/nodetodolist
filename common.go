@@ -11,6 +11,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const server_crt_path_default = "./server.crt"
+const server_key_path_default = "./server.key"
+const jwt_key_path_default = "./jwt.key"
+
 type ConfigStruct struct {
 	Port           int    `json:"port"`
 	Index          string `json:"indexhtml"`
@@ -22,6 +26,9 @@ type ConfigStruct struct {
 	Age            int    `json:"age"`
 	Unrestricted   bool   `json:"unrestricted"`
 	Secure         bool   `json:"secure"`
+	ServerCrtPath 	string `json:"servercrt"`
+	ServerKeyPath 	string `json:"serverkey"`
+	JwtKeyPath 	string `json:"jwt"`
 	currentFile    string
 }
 
@@ -131,4 +138,11 @@ func (config *ConfigStruct) GetLists() []ListStruct {
 func (config *ConfigStruct) GetItems(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(alfredo.ContentTypeJSON())
 	json.NewEncoder(w).Encode(config.GetLists())
+}
+
+func ThisOrDefault(s string, def string) string {
+	if len(s) > 0 {
+		return s
+	}
+	return def
 }
