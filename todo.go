@@ -231,8 +231,17 @@ func todoMain() {
 	SetupStaticRoutes(r)
 
 	log.Printf("Listening on :%d...\n", config.Port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r)
-	if err != nil {
-		log.Fatal(err)
+
+	if config.Secure {
+		err := http.ListenAndServeTLS(fmt.Sprintf(":%d", config.Port), config.ServerCrtPath, config.ServerKeyPath, r)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	} else {
+		err := http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
